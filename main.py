@@ -53,7 +53,7 @@ async def updateUrl():
     global RESULT   
     async for msg in RESULT['rawCh'].history():
         if msg.content.strip() not in str(RESULT['urlsCh'].threads):
-            await RESULT['urlsCh'].create_thread(name=msg.content.strip(),content='hello world')
+            await RESULT['urlsCh'].create_thread(name=msg.content.strip(),content=msg.content.strip())
             BASE_URL=msg.content.strip()
             headers={
                 'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0'
@@ -64,7 +64,7 @@ async def updateUrl():
                         location=res.headers['location']
                         headers['cookie']=''
                         async with session.get(location,headers=headers,allow_redirects=False) as res:
-                            cookies = session.cookie_jar.filter_cookies('streamlit.app')
+                            cookies = session.cookie_jar.filter_cookies(location)
                             for key, cookie in cookies.items():
                                 headers['cookie'] += cookie.key +'='+cookie.value+';'
                             async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
@@ -92,7 +92,7 @@ async def keepLive():
                     location=res.headers['location']
                     headers['cookie']=''
                     async with session.get(location,headers=headers,allow_redirects=False) as res:
-                        cookies = session.cookie_jar.filter_cookies('streamlit.app')
+                        cookies = session.cookie_jar.filter_cookies(location)
                         for key, cookie in cookies.items():
                             headers['cookie'] += cookie.key +'='+cookie.value+';'
                         async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
@@ -105,5 +105,7 @@ async def keepLive():
                                     url=BASE_URL+'api/v2/app/resume'
                                     req=requests.post(url,headers=headers)
                                 requests.get(BASE_URL,headers=headers)
+                                await RESULT['urlsCh'].create_thread(name=thread.name,content=thread.name)
+                                await thread.delete()
                                 print(BASE_URL,'Ping success!')
 client.run(os.environ.get('botToken'))
