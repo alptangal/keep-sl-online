@@ -1,0 +1,12 @@
+import asyncio
+
+
+async def getBasic(guild):
+    for category in guild.categories:
+        if 'streamlit' in category.name:
+            streamlitCate=category
+            for channel in category.channels:
+                if 'urls' in channel.name:
+                    urlsCh=channel
+
+    return {'streamlitCate':streamlitCate if 'streamlitCate' in locals else None,'urlsCh':urlsCh if 'urlsCh' in locals else None}
