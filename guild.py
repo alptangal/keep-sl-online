@@ -8,5 +8,7 @@ async def getBasic(guild):
             for channel in category.channels:
                 if 'urls' in channel.name:
                     urlsCh=channel
+                elif 'raw' in channel.name:
+                    rawCh=channel
 
-    return {'streamlitCate':streamlitCate if 'streamlitCate' in locals else None,'urlsCh':urlsCh if 'urlsCh' in locals else None}
+    return {'streamlitCate':streamlitCate if 'streamlitCate' in locals else None,'urlsCh':urlsCh if 'urlsCh' in locals else None,'rawCh':rawCh if 'rawCh' in locals else None}
