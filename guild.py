@@ -11,4 +11,4 @@ async def getBasic(guild):
                 elif 'raw' in channel.name:
                     rawCh=channel
 
-    return {'streamlitCate':streamlitCate if 'streamlitCate' in locals else None,'urlsCh':urlsCh if 'urlsCh' in locals else None,'rawCh':rawCh if 'rawCh' in locals else None}
+    return {'streamlitCate':streamlitCate if 'streamlitCate' in locals() else None,'urlsCh':urlsCh if 'urlsCh' in locals() else None,'rawCh':rawCh if 'rawCh' in locals() else None}
