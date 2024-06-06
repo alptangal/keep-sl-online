@@ -51,34 +51,37 @@ async def on_ready():
                 updateUrl.start()
 @tasks.loop(seconds=1)
 async def updateUrl():
-    global RESULT   
-    async for msg in RESULT['rawCh'].history():
-        if msg.content.strip() not in str(RESULT['urlsCh'].threads):
-            await RESULT['urlsCh'].create_thread(name=msg.content.strip(),content=msg.content.strip())
-            BASE_URL=msg.content.strip()
-            headers={
-                'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0'
-            }
-            async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar()) as session:
-                async with session.get(BASE_URL,headers=headers,allow_redirects=False) as res:
-                    if res.status<400:
-                        location=res.headers['location']
-                        headers['cookie']=''
-                        async with session.get(location,headers=headers,allow_redirects=False) as res:
-                            cookies = session.cookie_jar.filter_cookies(location)
-                            for key, cookie in cookies.items():
-                                headers['cookie'] += cookie.key +'='+cookie.value+';'
-                            async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
-                                if res.status<400:
-                                    headers['x-csrf-token']=res.headers['x-csrf-token']
-                                    url=BASE_URL+'api/v2/app/status'
-                                    req=requests.get(url,headers=headers)
-                                    js=req.json()
-                                    if js['status']!=5:
-                                        url=BASE_URL+'api/v2/app/resume'
-                                        req=requests.post(url,headers=headers)
-                                    requests.get(BASE_URL,headers=headers)
-                                    print(BASE_URL,'Ping success!')
+    global RESULT 
+    try:
+        async for msg in RESULT['rawCh'].history():
+            if msg.content.strip() not in str(RESULT['urlsCh'].threads):
+                await RESULT['urlsCh'].create_thread(name=msg.content.strip(),content=msg.content.strip())
+                BASE_URL=msg.content.strip()
+                headers={
+                    'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0'
+                }
+                async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar()) as session:
+                    async with session.get(BASE_URL,headers=headers,allow_redirects=False) as res:
+                        if res.status<400:
+                            location=res.headers['location']
+                            headers['cookie']=''
+                            async with session.get(location,headers=headers,allow_redirects=False) as res:
+                                cookies = session.cookie_jar.filter_cookies(location)
+                                for key, cookie in cookies.items():
+                                    headers['cookie'] += cookie.key +'='+cookie.value+';'
+                                async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
+                                    if res.status<400:
+                                        headers['x-csrf-token']=res.headers['x-csrf-token']
+                                        url=BASE_URL+'api/v2/app/status'
+                                        req=requests.get(url,headers=headers)
+                                        js=req.json()
+                                        if js['status']!=5:
+                                            url=BASE_URL+'api/v2/app/resume'
+                                            req=requests.post(url,headers=headers)
+                                        requests.get(BASE_URL,headers=headers)
+                                        print(BASE_URL,'Ping success!')
+    except:
+        pass
 @tasks.loop(minutes=15)
 async def keepLive():
     global RESULT
