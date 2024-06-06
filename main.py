@@ -33,6 +33,7 @@ async def on_ready():
         print('Client closed')
         exit()
     except Exception as error:
+        print(error)
         if 'No connection could be made because the target machine actively refused it' in str(error):
             server.b()  
             guild = client.get_guild(GUILD_ID)
