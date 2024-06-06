@@ -82,7 +82,7 @@ async def updateUrl():
                                         print(BASE_URL,'Ping success!')
     except:
         pass
-@tasks.loop(minutes=15)
+@tasks.loop(minutes=5)
 async def keepLive():
     global RESULT
     for thread in RESULT['urlsCh'].threads:
