@@ -32,22 +32,23 @@ async def on_ready():
         await client.close() 
         print('Client closed')
         exit()
-    except:
-        server.b()  
-        guild = client.get_guild(GUILD_ID)
-        RESULT=await getBasic(guild)
-        overwrites = {
-            guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            guild.me: discord.PermissionOverwrite(read_messages=True)
-        }
-        if not RESULT['streamlitCate']:
-            RESULT['streamlitCate']=await guild.create_category(name='streamlit',overwrites=overwrites)
-            RESULT['urlsCh']=await RESULT['streamlitCate'].create_forum(name='urls',overwrites=overwrites)
-            RESULT['rawCh']=await RESULT['streamlitCate'].create_text_channel(name='raw',overwrites=overwrites)
-        if not keepLive.is_running():
-            keepLive.start()
-        if not updateUrl.is_running():
-            updateUrl.start()
+    except Exception as error:
+        if 'No connection could be made because the target machine actively refused it' in str(error):
+            server.b()  
+            guild = client.get_guild(GUILD_ID)
+            RESULT=await getBasic(guild)
+            overwrites = {
+                guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                guild.me: discord.PermissionOverwrite(read_messages=True)
+            }
+            if not RESULT['streamlitCate']:
+                RESULT['streamlitCate']=await guild.create_category(name='streamlit',overwrites=overwrites)
+                RESULT['urlsCh']=await RESULT['streamlitCate'].create_forum(name='urls',overwrites=overwrites)
+                RESULT['rawCh']=await RESULT['streamlitCate'].create_text_channel(name='raw',overwrites=overwrites)
+            if not keepLive.is_running():
+                keepLive.start()
+            if not updateUrl.is_running():
+                updateUrl.start()
 @tasks.loop(seconds=1)
 async def updateUrl():
     global RESULT   
