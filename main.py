@@ -28,15 +28,13 @@ URL_STREAM='https://shoebee-fswaboivdxpaan5ewbppbf.streamlit.app/'
 async def on_ready():
     global RESULT,GUILD_ID
     try:
-        #req=requests.get('http://localhost:8888')
+        req=requests.get('http://localhost:8888')
         #server.b()
-        print(1111111111111111111111111111111111)
         if int(str(datetime.datetime.now().timestamp()).split('.')[0])-int(req.text.split('.')[0])>=10:
             raise Exception("Server not response")
-        #await client.close() 
         sys.exit("Exited")   
     except Exception as error:
-        #print(error)
+        print(error)
         #if 'No connection could be made because the target machine actively refused it' in str(error) or "Server not response" in str(error):
         server.b()  
         guild = client.get_guild(GUILD_ID)
