@@ -27,7 +27,6 @@ URL_STREAM='https://shoebee-fswaboivdxpaan5ewbppbf.streamlit.app/'
 async def on_ready():
     global RESULT,GUILD_ID
     try:
-        server.b()
         req=requests.get('http://localhost:8888')
         await client.close() 
         exit()
