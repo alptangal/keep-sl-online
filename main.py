@@ -28,7 +28,7 @@ URL_STREAM='https://shoebee-fswaboivdxpaan5ewbppbf.streamlit.app/'
 async def on_ready():
     global RESULT,GUILD_ID
     try:
-        req=requests.get('http://localhost:8888')
+        req=requests.get('http://localhost:8889')
         print(req.text)
         if int(str(datetime.datetime.now().timestamp()).split('.')[0])-int(req.text.split('.')[0])>=10:
             raise Exception("Server not response")
