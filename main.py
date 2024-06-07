@@ -29,30 +29,30 @@ async def on_ready():
     global RESULT,GUILD_ID
     try:
         #req=requests.get('http://localhost:8888')
-        server.b()
+        #server.b()
         print(1111111111111111111111111111111111)
         if int(str(datetime.datetime.now().timestamp()).split('.')[0])-int(req.text.split('.')[0])>=10:
             raise Exception("Server not response")
         #await client.close() 
         sys.exit("Exited")   
     except Exception as error:
-        print(error)
-        if 'No connection could be made because the target machine actively refused it' in str(error) or "Server not response" in str(error):
-            server.b()  
-            guild = client.get_guild(GUILD_ID)
-            RESULT=await getBasic(guild)
-            overwrites = {
-                guild.default_role: discord.PermissionOverwrite(read_messages=False),
-                guild.me: discord.PermissionOverwrite(read_messages=True)
-            }
-            if not RESULT['streamlitCate']:
-                RESULT['streamlitCate']=await guild.create_category(name='streamlit',overwrites=overwrites)
-                RESULT['urlsCh']=await RESULT['streamlitCate'].create_forum(name='urls',overwrites=overwrites)
-                RESULT['rawCh']=await RESULT['streamlitCate'].create_text_channel(name='raw',overwrites=overwrites)
-            if not keepLive.is_running():
-                keepLive.start()
-            if not updateUrl.is_running():
-                updateUrl.start()
+        #print(error)
+        #if 'No connection could be made because the target machine actively refused it' in str(error) or "Server not response" in str(error):
+        server.b()  
+        guild = client.get_guild(GUILD_ID)
+        RESULT=await getBasic(guild)
+        overwrites = {
+            guild.default_role: discord.PermissionOverwrite(read_messages=False),
+            guild.me: discord.PermissionOverwrite(read_messages=True)
+        }
+        if not RESULT['streamlitCate']:
+            RESULT['streamlitCate']=await guild.create_category(name='streamlit',overwrites=overwrites)
+            RESULT['urlsCh']=await RESULT['streamlitCate'].create_forum(name='urls',overwrites=overwrites)
+            RESULT['rawCh']=await RESULT['streamlitCate'].create_text_channel(name='raw',overwrites=overwrites)
+        if not keepLive.is_running():
+            keepLive.start()
+        if not updateUrl.is_running():
+            updateUrl.start()
 @tasks.loop(seconds=1)
 async def updateUrl():
     global RESULT 
