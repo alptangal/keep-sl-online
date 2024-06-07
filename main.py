@@ -32,8 +32,8 @@ async def on_ready():
         print(req.text)
         if int(str(datetime.datetime.now().timestamp()).split('.')[0])-int(req.text.split('.')[0])>=10:
             raise Exception("Server not response")
-        await client.close() 
-        exit()
+        '''await client.close() 
+        exit()'''
     except Exception as error:
         print(error)
         if 'No connection could be made because the target machine actively refused it' in str(error) or "Server not response" in str(error):
