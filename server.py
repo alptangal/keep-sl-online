@@ -1,11 +1,12 @@
 from flask import Flask
 from threading import Thread
+import datetime
 
 app = Flask('')
 
 @app.route('/')
 def main():
-    return 'Bot ready!'
+    return str(datetime.datetime.now().timestamp())
 
 def run():
     app.run(host='0.0.0.0', port=8888)

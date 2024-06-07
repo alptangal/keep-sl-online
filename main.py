@@ -9,6 +9,7 @@ from guild import *
 import server
 import aiohttp
 import requests
+import datetime
 
 
 GUILD_ID=1122707918177960047
@@ -28,6 +29,8 @@ async def on_ready():
     global RESULT,GUILD_ID
     try:
         req=requests.get('http://localhost:8888')
+        if int(str(datetime.datetime.now().timestamp()).split('.')[0])-int(req.text.split('.')[0])>=10:
+            raise Exception("Server not response")
         await client.close() 
         exit()
     except Exception as error:
@@ -111,4 +114,4 @@ async def keepLive():
                                 await RESULT['urlsCh'].create_thread(name=thread.name,content=thread.name)
                                 await thread.delete()
                                 print(BASE_URL,'Ping success!')
-client.run(os.environ.get('botToken'))
+client.run('MTI0NzQ3MDQ4MjE4MjI0MjM2NA.GLEOv9.iu_TGoiVgQzNUxzwxZLZhgKJJqTEfD2QR6mX4w')#os.environ.get('botToken'))
