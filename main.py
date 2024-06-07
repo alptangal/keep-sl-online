@@ -35,7 +35,7 @@ async def on_ready():
         exit()
     except Exception as error:
         print(error)
-        if 'No connection could be made because the target machine actively refused it' in str(error):
+        if 'No connection could be made because the target machine actively refused it' in str(error) or "Server not response" in str(error):
             server.b()  
             guild = client.get_guild(GUILD_ID)
             RESULT=await getBasic(guild)
@@ -114,4 +114,4 @@ async def keepLive():
                                 await RESULT['urlsCh'].create_thread(name=thread.name,content=thread.name)
                                 await thread.delete()
                                 print(BASE_URL,'Ping success!')
-client.run('MTI0NzQ3MDQ4MjE4MjI0MjM2NA.GLEOv9.iu_TGoiVgQzNUxzwxZLZhgKJJqTEfD2QR6mX4w')#os.environ.get('botToken'))
+client.run(os.environ.get('botToken'))
