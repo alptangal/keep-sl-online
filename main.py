@@ -53,9 +53,14 @@ async def on_ready():
             updateUrl.start()
 @tasks.loop(seconds=1)
 async def updateUrl():
-    global RESULT 
+    global RESULT
+    obj={}
     try:
         async for msg in RESULT['rawCh'].history():
+            if msg.content.strip() not in obj:
+                obj[msg.content.strip()]=''
+            else:
+                await msg.delete()
             if msg.content.strip() not in str(RESULT['urlsCh'].threads):
                 await RESULT['urlsCh'].create_thread(name=msg.content.strip(),content=msg.content.strip())
                 BASE_URL=msg.content.strip()
@@ -103,6 +108,9 @@ async def keepLive():
                         for key, cookie in cookies.items():
                             headers['cookie'] += cookie.key +'='+cookie.value+';'
                         async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
+                            for thread in RESULT['urlsCh'].threads:
+                                if BASE_URL in thread.name:
+                                    await thread.delete()
                             if res.status<400:
                                 headers['x-csrf-token']=res.headers['x-csrf-token']
                                 url=BASE_URL+'api/v2/app/status'
@@ -112,9 +120,10 @@ async def keepLive():
                                     url=BASE_URL+'api/v2/app/resume'
                                     req=requests.post(url,headers=headers)
                                 requests.get(BASE_URL,headers=headers)
-                                for thread in RESULT['urlsCh'].threads:
-                                    if BASE_URL in thread.name:
-                                        await thread.delete()
+                                
                                 await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
                                 print(BASE_URL,'Ping success!')
+                            else:
+                                await msg.delete()
+                                
 client.run(os.environ.get('botToken'))
