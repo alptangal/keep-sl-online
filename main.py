@@ -87,8 +87,8 @@ async def updateUrl():
 @tasks.loop(minutes=5)
 async def keepLive():
     global RESULT
-    for thread in RESULT['urlsCh'].threads:
-        BASE_URL=thread.name
+    async for msg in RESULT['raw'].history():
+        BASE_URL=msg.content.strip()
         headers={
             'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0'
         }
@@ -111,7 +111,6 @@ async def keepLive():
                                     url=BASE_URL+'api/v2/app/resume'
                                     req=requests.post(url,headers=headers)
                                 requests.get(BASE_URL,headers=headers)
-                                await RESULT['urlsCh'].create_thread(name=thread.name,content=thread.name)
-                                await thread.delete()
+                                await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
                                 print(BASE_URL,'Ping success!')
 client.run(os.environ.get('botToken'))
