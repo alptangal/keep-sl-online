@@ -110,7 +110,10 @@ async def keepLive():
                         async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
                             for thread in RESULT['urlsCh'].threads:
                                 if BASE_URL in thread.name:
-                                    await thread.delete()
+                                    try:
+                                        await thread.delete()
+                                    except Exception as error:
+                                        print(error,11111)
                             if res.status<400:
                                 headers['x-csrf-token']=res.headers['x-csrf-token']
                                 url=BASE_URL+'api/v2/app/status'
@@ -124,6 +127,9 @@ async def keepLive():
                                 await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
                                 print(BASE_URL,'Ping success!')
                             else:
-                                await msg.delete()
+                                try:
+                                    await msg.delete()
+                                except Exception as error:
+                                    print(error,22222)
                                 
 client.run(os.environ.get('botToken'))
