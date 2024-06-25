@@ -92,55 +92,58 @@ async def updateUrl():
 @tasks.loop(minutes=5)
 async def keepLive():
     global RESULT
-    async for msg in RESULT['rawCh'].history():
-        BASE_URL=msg.content.strip()
-        print(BASE_URL+' processing')
-        headers={
-            'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0'
-        }
-        async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar()) as session:
-            async with session.get(BASE_URL,headers=headers,allow_redirects=False) as res:
-                if res.status<400:
-                    location=res.headers['location']
-                    headers['cookie']=''
-                    async with session.get(location,headers=headers,allow_redirects=False) as res:
-                        if res.status<400:
-                            location=res.headers['location']
-                            async with session.get(location,headers=headers,allow_redirects=False) as res:
-                                if res.status<400:
-                                    location=res.headers['location']
-                                    async with session.get(location,headers=headers,allow_redirects=False) as res:
-                                        if res.status<400:
-                                            async with session.get(location+'pi/v2/app/context',headers=headers,allow_redirects=False) as res:
-                                                if res.status<400:
-                                                    cookies = session.cookie_jar.filter_cookies(location)
-                                                    for key, cookie in cookies.items():
-                                                        headers['cookie'] += cookie.key +'='+cookie.value+';'
-                                                    async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
-                                                        for thread in RESULT['urlsCh'].threads:
-                                                            if BASE_URL in thread.name:
+    try:
+        async for msg in RESULT['rawCh'].history():
+            BASE_URL=msg.content.strip()
+            print(BASE_URL+' processing')
+            headers={
+                'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0'
+            }
+            async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar()) as session:
+                async with session.get(BASE_URL,headers=headers,allow_redirects=False) as res:
+                    if res.status<400:
+                        location=res.headers['location']
+                        headers['cookie']=''
+                        async with session.get(location,headers=headers,allow_redirects=False) as res:
+                            if res.status<400:
+                                location=res.headers['location']
+                                async with session.get(location,headers=headers,allow_redirects=False) as res:
+                                    if res.status<400:
+                                        location=res.headers['location']
+                                        async with session.get(location,headers=headers,allow_redirects=False) as res:
+                                            if res.status<400:
+                                                async with session.get(location+'pi/v2/app/context',headers=headers,allow_redirects=False) as res:
+                                                    if res.status<400:
+                                                        cookies = session.cookie_jar.filter_cookies(location)
+                                                        for key, cookie in cookies.items():
+                                                            headers['cookie'] += cookie.key +'='+cookie.value+';'
+                                                        async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
+                                                            for thread in RESULT['urlsCh'].threads:
+                                                                if BASE_URL in thread.name:
+                                                                    try:
+                                                                        await thread.delete()
+                                                                    except Exception as error:
+                                                                        print(error,2222)
+                                                                        pass
+                                                            if res.status<400:
+                                                                headers['x-csrf-token']=res.headers['x-csrf-token']
+                                                                url=BASE_URL+'api/v2/app/status'
+                                                                req=requests.get(url,headers=headers)
+                                                                js=req.json()
+                                                                if js['status']!=5:
+                                                                    url=BASE_URL+'api/v2/app/resume'
+                                                                    req=requests.post(url,headers=headers)
+                                                                requests.get(BASE_URL,headers=headers)
+                                                                
+                                                                await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
+                                                                print(BASE_URL,'Ping success!')
+                                                            else:
                                                                 try:
-                                                                    await thread.delete()
+                                                                    await msg.delete()
                                                                 except Exception as error:
-                                                                    print(error,2222)
+                                                                    print(error,3333)
                                                                     pass
-                                                        if res.status<400:
-                                                            headers['x-csrf-token']=res.headers['x-csrf-token']
-                                                            url=BASE_URL+'api/v2/app/status'
-                                                            req=requests.get(url,headers=headers)
-                                                            js=req.json()
-                                                            if js['status']!=5:
-                                                                url=BASE_URL+'api/v2/app/resume'
-                                                                req=requests.post(url,headers=headers)
-                                                            requests.get(BASE_URL,headers=headers)
-                                                            
-                                                            await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
-                                                            print(BASE_URL,'Ping success!')
-                                                        else:
-                                                            try:
-                                                                await msg.delete()
-                                                            except Exception as error:
-                                                                print(error,3333)
-                                                                pass
-                                
+    except Exception as error:
+        print(error,112233)
+        pass
 client.run(os.environ.get('botToken'))
