@@ -10,6 +10,8 @@ import server
 import aiohttp
 import requests
 import datetime
+from dotenv import load_dotenv
+load_dotenv()
 
 
 GUILD_ID=1122707918177960047
@@ -131,8 +133,10 @@ async def keepLive():
                                                                 req=requests.get(url,headers=headers)
                                                                 js=req.json()
                                                                 if js['status']!=5:
+                                                                    print(BASE_URL,'Resuming...')
                                                                     url=BASE_URL+'api/v2/app/resume'
                                                                     req=requests.post(url,headers=headers)
+                                                                    print(req.text)
                                                                 requests.get(BASE_URL,headers=headers)
                                                                 
                                                                 await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
