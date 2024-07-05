@@ -82,13 +82,13 @@ async def updateUrl():
                                     if res.status<400:
                                         headers['x-csrf-token']=res.headers['x-csrf-token']
                                         url=BASE_URL+'api/v2/app/status'
-                                        req=requests.get(url,headers=headers)
-                                        js=req.json()
-                                        if js['status']!=5:
-                                            url=BASE_URL+'api/v2/app/resume'
-                                            req=requests.post(url,headers=headers)
-                                        requests.get(BASE_URL,headers=headers)
-                                        print(BASE_URL,'Ping success!')
+                                        async with session.get(url,headers=headers) as res:
+                                            js=await res.json()
+                                            if js['status']!=5:
+                                                url=BASE_URL+'api/v2/app/resume'
+                                                req=requests.post(url,headers=headers)
+                                            async with session.get(BASE_URL,headers=headers) as res:
+                                                print(BASE_URL,'Ping success!')
     except:
         pass
 @tasks.loop(minutes=5)
@@ -130,17 +130,18 @@ async def keepLive():
                                                             if res.status<400:
                                                                 headers['x-csrf-token']=res.headers['x-csrf-token']
                                                                 url=BASE_URL+'api/v2/app/status'
-                                                                req=requests.get(url,headers=headers)
-                                                                js=req.json()
-                                                                if js['status']!=5:
-                                                                    print(BASE_URL,'Resuming...')
-                                                                    url=BASE_URL+'api/v2/app/resume'
-                                                                    req=requests.post(url,headers=headers)
-                                                                    print(req.text)
-                                                                requests.get(BASE_URL,headers=headers)
-                                                                
-                                                                await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
-                                                                print(BASE_URL,'Ping success!')
+                                                                async with session.get(url,headers=headers) as res:
+                                                                    js=await res.json()
+                                                                    if js['status']!=5:
+                                                                        print(BASE_URL,'Resuming...')
+                                                                        url=BASE_URL+'api/v2/app/resume'
+                                                                        async with session.post(url,headers=headers) as res:
+                                                                            print(await res.text())
+                                                                    async with session.get(BASE_URL,headers=headers) as res:
+                                                                        print(res.status)
+                                                                    
+                                                                    await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
+                                                                    print(BASE_URL,'Ping success!')
                                                             else:
                                                                 try:
                                                                     await msg.delete()
