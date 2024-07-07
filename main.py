@@ -137,6 +137,11 @@ async def keepLive():
                                                                         url=BASE_URL+'api/v2/app/resume'
                                                                         async with session.post(url,headers=headers) as res:
                                                                             print(await res.text())
+                                                                    now=datetime.datetime.now()
+                                                                    if now.hour+7==0 and now.minute==0:
+                                                                        url=BASE_URL+'api/v2/app/restart'
+                                                                        async with session.post(BASE_URL,headers=headers) as res:
+                                                                            print(res.status)
                                                                     async with session.get(BASE_URL,headers=headers) as res:
                                                                         print(res.status)
                                                                     
