@@ -136,7 +136,19 @@ async def keepLive():
                                                                         print(BASE_URL,'Resuming...')
                                                                         url=BASE_URL+'api/v2/app/resume'
                                                                         async with session.post(url,headers=headers) as res:
-                                                                            print(await res.text())
+                                                                            if res.status<400:
+                                                                                stop=False
+                                                                                i=0
+                                                                                while not stop:
+                                                                                    async with session.get(BASE_URL+'api/v2/app/status',headers=headers) as res:
+                                                                                        if res.status<400:
+                                                                                            js=await res.json()
+                                                                                            if js['status']==5:
+                                                                                                stop=True
+                                                                                    if i==20:
+                                                                                        stop=True
+                                                                                    asyncio.sleep(2)
+                                                                                    i+=1
                                                                     now=datetime.datetime.now()
                                                                     if now.hour+7==0 and now.minute==0:
                                                                         url=BASE_URL+'api/v2/app/restart'
