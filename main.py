@@ -147,7 +147,7 @@ async def keepLive():
                                                                                                 stop=True
                                                                                     if i==20:
                                                                                         stop=True
-                                                                                    asyncio.sleep(2)
+                                                                                    await asyncio.sleep(2)
                                                                                     i+=1
                                                                     now=datetime.datetime.now()
                                                                     if now.hour+7==0 and now.minute==0:
