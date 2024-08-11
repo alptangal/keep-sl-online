@@ -150,7 +150,7 @@ async def keepLive():
                                                                                     await asyncio.sleep(2)
                                                                                     i+=1
                                                                     now=datetime.datetime.now()
-                                                                    if now.hour+7==0 and now.minute==0:
+                                                                    if now.hour+7==1 and now.minute==0:
                                                                         url=BASE_URL+'api/v2/app/restart'
                                                                         async with session.post(BASE_URL,headers=headers) as res:
                                                                             print(res.status)
