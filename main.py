@@ -59,10 +59,12 @@ async def updateUrl():
     obj={}
     try:
         async for msg in RESULT['rawCh'].history():
+            '''
             if msg.content.strip() not in obj:
                 obj[msg.content.strip()]=''
             else:
                 await msg.delete()
+            '''    
             if msg.content.strip() not in str(RESULT['urlsCh'].threads):
                 await RESULT['urlsCh'].create_thread(name=msg.content.strip(),content=msg.content.strip())
                 BASE_URL=msg.content.strip()
