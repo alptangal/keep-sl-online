@@ -270,7 +270,7 @@ async def keepLive(guild):
                                                                 if req.status_code<400:
                                                                     js=req.json()
                                                                     if js['status']!=5:
-                                                                        await asyncio.sleep(5)
+                                                                        await asyncio.sleep(30)
                                                                     else:
                                                                         stop=True
                                                             
