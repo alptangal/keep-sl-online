@@ -123,14 +123,14 @@ async def keepLive(guild):
                                                             for key, cookie in cookies.items():
                                                                 headers['cookie'] += cookie.key +'='+cookie.value+';'
                                                             async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
-                                                                for thread in RESULT['urlsCh'].threads:
+                                                                '''for thread in RESULT['urlsCh'].threads:
                                                                     if BASE_URL in thread.name:
                                                                         try:
                                                                             await thread.delete()
                                                                         except Exception as error:
                                                                             print(error,2222)
                                                                             pass
-                                                                await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
+                                                                await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)'''
                                                                 print(BASE_URL,'Ping success!')
                         else:
                             async with session.get(BASE_URL+'api/v2/app/context',headers=headers,allow_redirects=False) as res:
@@ -139,14 +139,14 @@ async def keepLive(guild):
                                     for key, cookie in cookies.items():
                                         headers['cookie'] += cookie.key +'='+cookie.value+';'
                                     async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
-                                        for thread in RESULT['urlsCh'].threads:
+                                        '''for thread in RESULT['urlsCh'].threads:
                                             if BASE_URL in thread.name:
                                                 try:
                                                     await thread.delete()
                                                 except Exception as error:
                                                     print(error,2222)
                                                     pass
-                                        await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
+                                        await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)'''
                                         print(BASE_URL,'Ping success!')
             id=int(msg.content.strip().split(' || ')[1])
             for member in guild.members:
@@ -171,13 +171,13 @@ async def keepLive(guild):
                                                                     for key, cookie in cookies.items():
                                                                         headers['cookie'] += cookie.key +'='+cookie.value+';'
                                                                     async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
-                                                                        for thread in RESULT['urlsCh'].threads:
+                                                                        '''for thread in RESULT['urlsCh'].threads:
                                                                             if BASE_URL in thread.name:
                                                                                 try:
                                                                                     await thread.delete()
                                                                                 except Exception as error:
                                                                                     print(error,2222)
-                                                                                    pass
+                                                                                    pass'''
                                                                         if res.status<400:
                                                                             headers['x-csrf-token']=res.headers['x-csrf-token']
                                                                             url=BASE_URL+'api/v2/app/status'
@@ -207,8 +207,8 @@ async def keepLive(guild):
                                                                                 async with session.get(BASE_URL,headers=headers) as res:
                                                                                     print(res.status)
                                                                                 
-                                                                                await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
-                                                                                print(BASE_URL,'Ping success!')
+                                                                                '''await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
+                                                                                print(BASE_URL,'Ping success!')'''
                                                                         else:
                                                                             try:
                                                                                 await msg.delete()
@@ -222,13 +222,13 @@ async def keepLive(guild):
                                             for key, cookie in cookies.items():
                                                 headers['cookie'] += cookie.key +'='+cookie.value+';'
                                             async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
-                                                for thread in RESULT['urlsCh'].threads:
+                                                '''for thread in RESULT['urlsCh'].threads:
                                                     if BASE_URL in thread.name:
                                                         try:
                                                             await thread.delete()
                                                         except Exception as error:
                                                             print(error,2222)
-                                                            pass
+                                                            pass'''
                                                 if res.status<400:
                                                     headers['x-csrf-token']=res.headers['x-csrf-token']
                                                     url=BASE_URL+'api/v2/app/status'
@@ -253,16 +253,22 @@ async def keepLive(guild):
                                                                         i+=1
                                                         else:
                                                             url=BASE_URL+'api/v2/app/restart'
+                                                            headers['content-type']='application/json'
                                                             headers['x-csrf-token']='NXlRV0lFQWRKY1NuZ0d5SmpidmloTWJIbmNZYTZEYkRlPBQ/KwsMAy4FNSUiESAPMjAYGR4bKSIeEC9WRjxWCQ=='
                                                             headers['cookie']='streamlit_session=MTcyNzU4OTQ1MHwzc3ZnYmJ3Q1VjQVpObG53OU1ndkdJejFWSWZZU0tBRUctQjY5c3dfWjdVaEVrcXE2aFhmenZaam1JRy11VklhVzdXRExIZDdCTEc4ZlBPNmE1UUZPV0NpTFBnWjFWbEswSWN6N0EzcHBNRDh6VmVwMUZLRzYtaGdtOXRZcVZIdm5iZHBHVUFFMzBVbnRUVDhYMmE1dnF5N2sxUlpzM2dJYUVKV1pQY3U2Z1h3aTltUEI0TklNNUN2MWc9PXzRNXhbLSr7v2HEbKkW7dG7SYhIAG8syrA6cT6PcVoTUg==;_streamlit_csrf=MTcyNzU4OTQ2MHxJbFZGVmtaaFIwcFBWRmRrYTFwdFdreFNWbHBhVWxab1UySnVRakpXYTNSeFkwaE9NazR6UWpST1JUQTlJZz09fMCqnUsraPXID4OUqUlNQzBliXqyC6OBcvo4p_uRHB3R'
-
-                                                            async with session.post(BASE_URL,headers=headers) as res:
-                                                                print(res.status,url)
+                                                            headers={
+                                                                'content-length':'0',
+                                                                'x-csrf-token':'NXlRV0lFQWRKY1NuZ0d5SmpidmloTWJIbmNZYTZEYkRlPBQ/KwsMAy4FNSUiESAPMjAYGR4bKSIeEC9WRjxWCQ==',
+                                                                'cookie':'streamlit_session=MTcyNzU4OTQ1MHwzc3ZnYmJ3Q1VjQVpObG53OU1ndkdJejFWSWZZU0tBRUctQjY5c3dfWjdVaEVrcXE2aFhmenZaam1JRy11VklhVzdXRExIZDdCTEc4ZlBPNmE1UUZPV0NpTFBnWjFWbEswSWN6N0EzcHBNRDh6VmVwMUZLRzYtaGdtOXRZcVZIdm5iZHBHVUFFMzBVbnRUVDhYMmE1dnF5N2sxUlpzM2dJYUVKV1pQY3U2Z1h3aTltUEI0TklNNUN2MWc9PXzRNXhbLSr7v2HEbKkW7dG7SYhIAG8syrA6cT6PcVoTUg==;_streamlit_csrf=MTcyNzU4OTQ2MHxJbFZGVmtaaFIwcFBWRmRrYTFwdFdreFNWbHBhVWxab1UySnVRakpXYTNSeFkwaE9NazR6UWpST1JUQTlJZz09fMCqnUsraPXID4OUqUlNQzBliXqyC6OBcvo4p_uRHB3R'
+                                                            }
+                                                            req=requests.post(url,headers=headers)
+                                                            print(req,url)
+                                                            
                                                         async with session.get(BASE_URL,headers=headers) as res:
                                                             print(res.status)
                                                         
-                                                        await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
-                                                        print(BASE_URL,'Ping success!')
+                                                        '''await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
+                                                        print(BASE_URL,'Ping success!')'''
                                                 else:
                                                     try:
                                                         await msg.delete()
