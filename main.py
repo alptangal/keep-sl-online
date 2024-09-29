@@ -257,6 +257,7 @@ async def keepLive(guild):
                                                             req=requests.post(url,headers=headers)
                                                             print(req,url)
                                                             stop=False
+                                                            i=0
                                                             while not stop:
                                                                 url=BASE_URL+'api/v2/app/status'
                                                                 req=requests.get(url,headers=headers)
@@ -266,6 +267,10 @@ async def keepLive(guild):
                                                                         await asyncio.sleep(60)
                                                                     else:
                                                                         stop=True
+                                                                if i==10:
+                                                                    stop=True
+                                                                i+=1
+                                                                
                                                             
                                                         async with session.get(location+'api/v2/app/context',headers=headers,allow_redirects=False) as res:
                                                             if res.status<400:
