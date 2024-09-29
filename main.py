@@ -222,13 +222,6 @@ async def keepLive(guild):
                                             for key, cookie in cookies.items():
                                                 headers['cookie'] += cookie.key +'='+cookie.value+';'
                                             async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
-                                                '''for thread in RESULT['urlsCh'].threads:
-                                                    if BASE_URL in thread.name:
-                                                        try:
-                                                            await thread.delete()
-                                                        except Exception as error:
-                                                            print(error,2222)
-                                                            pass'''
                                                 if res.status<400:
                                                     headers['x-csrf-token']=res.headers['x-csrf-token']
                                                     url=BASE_URL+'api/v2/app/status'
@@ -274,8 +267,20 @@ async def keepLive(guild):
                                                                     else:
                                                                         stop=True
                                                             
-                                                        async with session.get(BASE_URL,headers=headers) as res:
-                                                            print(res.status)
+                                                        async with session.get(location+'api/v2/app/context',headers=headers,allow_redirects=False) as res:
+                                                            if res.status<400:
+                                                                cookies = session.cookie_jar.filter_cookies(location)
+                                                                for key, cookie in cookies.items():
+                                                                    headers['cookie'] += cookie.key +'='+cookie.value+';'
+                                                                async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
+                                                                    if res.status<400:
+                                                                        headers['x-csrf-token']=res.headers['x-csrf-token']
+                                                                        url=BASE_URL+'api/v1/app/event/open'
+                                                                        async with session.post(url,headers=headers) as res:
+                                                                            url=BASE_URL+'api/v2/app/status'
+                                                                            async with session.get(url,headers=headers) as res:
+                                                                                print(res.status)
+                                                                                await asyncio.sleep(30)
                                                         
                                                         '''await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
                                                         print(BASE_URL,'Ping success!')'''
