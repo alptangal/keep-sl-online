@@ -92,7 +92,7 @@ async def updateUrl():
                                                 print(BASE_URL,'Ping success!')
     except:
         pass
-@tasks.loop(seconds=15)
+@tasks.loop(seconds=30)
 async def keepLive(guild):
     global RESULT
     location=None
@@ -117,7 +117,7 @@ async def keepLive(guild):
                                             location=res.headers['location']
                                             async with session.get(location,headers=headers,allow_redirects=False) as res:
                                                 if res.status<400:
-                                                    async with session.get(location+'pi/v2/app/context',headers=headers,allow_redirects=False) as res:
+                                                    async with session.get(location+'api/v2/app/context',headers=headers,allow_redirects=False) as res:
                                                         if res.status<400:
                                                             cookies = session.cookie_jar.filter_cookies(location)
                                                             for key, cookie in cookies.items():
@@ -133,7 +133,7 @@ async def keepLive(guild):
                                                                 await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
                                                                 print(BASE_URL,'Ping success!')
                         else:
-                            async with session.get(BASE_URL+'pi/v2/app/context',headers=headers,allow_redirects=False) as res:
+                            async with session.get(BASE_URL+'api/v2/app/context',headers=headers,allow_redirects=False) as res:
                                 if res.status<400:
                                     cookies = session.cookie_jar.filter_cookies(location)
                                     for key, cookie in cookies.items():
@@ -165,7 +165,7 @@ async def keepLive(guild):
                                                     location=res.headers['location']
                                                     async with session.get(location,headers=headers,allow_redirects=False) as res:
                                                         if res.status<400:
-                                                            async with session.get(location+'pi/v2/app/context',headers=headers,allow_redirects=False) as res:
+                                                            async with session.get(location+'api/v2/app/context',headers=headers,allow_redirects=False) as res:
                                                                 if res.status<400:
                                                                     cookies = session.cookie_jar.filter_cookies(location)
                                                                     for key, cookie in cookies.items():
@@ -200,11 +200,10 @@ async def keepLive(guild):
                                                                                                     stop=True
                                                                                                 await asyncio.sleep(2)
                                                                                                 i+=1
-                                                                                now=datetime.datetime.now()
-                                                                                if now.hour+7==0 and now.minute==0:
+                                                                                else:
                                                                                     url=BASE_URL+'api/v2/app/restart'
                                                                                     async with session.post(BASE_URL,headers=headers) as res:
-                                                                                        print(res.status)
+                                                                                        print(res.status,2222222)
                                                                                 async with session.get(BASE_URL,headers=headers) as res:
                                                                                     print(res.status)
                                                                                 
@@ -217,7 +216,7 @@ async def keepLive(guild):
                                                                                 print(error,3333)
                                                                                 pass
                                 else:
-                                    async with session.get(location+'pi/v2/app/context',headers=headers,allow_redirects=False) as res:
+                                    async with session.get(location+'api/v2/app/context',headers=headers,allow_redirects=False) as res:
                                         if res.status<400:
                                             cookies = session.cookie_jar.filter_cookies(location)
                                             for key, cookie in cookies.items():
@@ -252,11 +251,13 @@ async def keepLive(guild):
                                                                             stop=True
                                                                         await asyncio.sleep(2)
                                                                         i+=1
-                                                        now=datetime.datetime.now()
-                                                        if now.hour+7==0 and now.minute==0:
+                                                        else:
                                                             url=BASE_URL+'api/v2/app/restart'
+                                                            headers['x-csrf-token']='NXlRV0lFQWRKY1NuZ0d5SmpidmloTWJIbmNZYTZEYkRlPBQ/KwsMAy4FNSUiESAPMjAYGR4bKSIeEC9WRjxWCQ=='
+                                                            headers['cookie']='streamlit_session=MTcyNzU4OTQ1MHwzc3ZnYmJ3Q1VjQVpObG53OU1ndkdJejFWSWZZU0tBRUctQjY5c3dfWjdVaEVrcXE2aFhmenZaam1JRy11VklhVzdXRExIZDdCTEc4ZlBPNmE1UUZPV0NpTFBnWjFWbEswSWN6N0EzcHBNRDh6VmVwMUZLRzYtaGdtOXRZcVZIdm5iZHBHVUFFMzBVbnRUVDhYMmE1dnF5N2sxUlpzM2dJYUVKV1pQY3U2Z1h3aTltUEI0TklNNUN2MWc9PXzRNXhbLSr7v2HEbKkW7dG7SYhIAG8syrA6cT6PcVoTUg==;_streamlit_csrf=MTcyNzU4OTQ2MHxJbFZGVmtaaFIwcFBWRmRrYTFwdFdreFNWbHBhVWxab1UySnVRakpXYTNSeFkwaE9NazR6UWpST1JUQTlJZz09fMCqnUsraPXID4OUqUlNQzBliXqyC6OBcvo4p_uRHB3R'
+
                                                             async with session.post(BASE_URL,headers=headers) as res:
-                                                                print(res.status)
+                                                                print(res.status,url)
                                                         async with session.get(BASE_URL,headers=headers) as res:
                                                             print(res.status)
                                                         
