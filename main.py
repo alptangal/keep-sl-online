@@ -280,10 +280,7 @@ async def keepLive(guild):
                                                                             url=BASE_URL+'api/v2/app/status'
                                                                             async with session.get(url,headers=headers) as res:
                                                                                 print(res.status)
-<<<<<<< HEAD
                                                                                 await asyncio.sleep(30)
-=======
->>>>>>> 23bae00216810b8216cd8fe01dd479c23d53f6fb
                                                         
                                                         '''await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
                                                         print(BASE_URL,'Ping success!')'''
