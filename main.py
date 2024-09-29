@@ -263,6 +263,16 @@ async def keepLive(guild):
                                                             }
                                                             req=requests.post(url,headers=headers)
                                                             print(req,url)
+                                                            stop=False
+                                                            while not stop:
+                                                                url=BASE_URL+'api/v2/app/status'
+                                                                req=requests.get(url,headers=headers)
+                                                                if req.status_code<400:
+                                                                    js=req.json()
+                                                                    if js['status']!=5:
+                                                                        await asyncio.sleep(5)
+                                                                    else:
+                                                                        stop=True
                                                             
                                                         async with session.get(BASE_URL,headers=headers) as res:
                                                             print(res.status)
