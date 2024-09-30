@@ -264,7 +264,7 @@ async def keepLive(guild):
                                                                 if req.status_code<400:
                                                                     js=req.json()
                                                                     if js['status']!=5:
-                                                                        await asyncio.sleep(60)
+                                                                        await asyncio.sleep(15)
                                                                     else:
                                                                         stop=True
                                                                 if i==10:
@@ -285,7 +285,7 @@ async def keepLive(guild):
                                                                             url=BASE_URL+'api/v2/app/status'
                                                                             async with session.get(url,headers=headers) as res:
                                                                                 print(res.status)
-                                                                                await asyncio.sleep(60)
+                                                                                await asyncio.sleep(30)
                                                         
                                                         '''await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
                                                         print(BASE_URL,'Ping success!')'''
