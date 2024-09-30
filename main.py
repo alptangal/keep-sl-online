@@ -257,15 +257,20 @@ async def keepLive(guild):
                                                             req=requests.post(url,headers=headers)
                                                             print(req,url)
                                                             stop=False
+                                                            i=0
                                                             while not stop:
                                                                 url=BASE_URL+'api/v2/app/status'
                                                                 req=requests.get(url,headers=headers)
                                                                 if req.status_code<400:
                                                                     js=req.json()
                                                                     if js['status']!=5:
-                                                                        await asyncio.sleep(30)
+                                                                        await asyncio.sleep(60)
                                                                     else:
                                                                         stop=True
+                                                                if i==10:
+                                                                    stop=True
+                                                                i+=1
+                                                                
                                                             
                                                         async with session.get(location+'api/v2/app/context',headers=headers,allow_redirects=False) as res:
                                                             if res.status<400:
@@ -280,7 +285,7 @@ async def keepLive(guild):
                                                                             url=BASE_URL+'api/v2/app/status'
                                                                             async with session.get(url,headers=headers) as res:
                                                                                 print(res.status)
-                                                                                await asyncio.sleep(30)
+                                                                                await asyncio.sleep(60)
                                                         
                                                         '''await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
                                                         print(BASE_URL,'Ping success!')'''
