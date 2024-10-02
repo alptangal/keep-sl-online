@@ -91,7 +91,7 @@ async def keepLive(guild):
         'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0'
     }
     try:
-        async for msg in RESULT['rawCh'].history():
+        async for msg in RESULT['rawCh'].history(oldest_first=True):
             BASE_URL=msg.content.strip().split(' || ')[0]
             print(BASE_URL+' processing')
             isPaused=False
