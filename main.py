@@ -91,7 +91,7 @@ async def keepLive(guild):
         'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0'
     }
     try:
-        async for msg in RESULT['rawCh'].history(oldest_first=True):
+        async for msg in RESULT['rawCh'].history():
             BASE_URL=msg.content.strip().split(' || ')[0]
             print(BASE_URL+' processing')
             isPaused=False
@@ -99,7 +99,7 @@ async def keepLive(guild):
                 async with session.get(BASE_URL+'api/v2/app/status',headers=headers) as res:
                     if res.status<400:
                         js=await res.json()
-                        if js['status']==5:
+                        if js['status']!=5:
                             isPaused=True
                 if not isPaused:
                     async with session.get(BASE_URL,headers=headers,allow_redirects=False) as res:
