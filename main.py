@@ -99,7 +99,7 @@ async def keepLive(guild):
                 async with session.get(BASE_URL+'api/v2/app/status',headers=headers) as res:
                     if res.status<400:
                         js=await res.json()
-                        if js['status']==5:
+                        if js['status']!=5:
                             isPaused=True
                 if not isPaused:
                     async with session.get(BASE_URL,headers=headers,allow_redirects=False) as res:
