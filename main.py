@@ -114,14 +114,6 @@ async def keepLive(guild):
                                                             for key, cookie in cookies.items():
                                                                 headers['cookie'] += cookie.key +'='+cookie.value+';'
                                                             async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
-                                                                '''for thread in RESULT['urlsCh'].threads:
-                                                                    if BASE_URL in thread.name:
-                                                                        try:
-                                                                            await thread.delete()
-                                                                        except Exception as error:
-                                                                            print(error,2222)
-                                                                            pass
-                                                                await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)'''
                                                                 print(BASE_URL,'Ping success!')
                         else:
                             async with session.get(BASE_URL+'api/v2/app/context',headers=headers,allow_redirects=False) as res:
@@ -257,9 +249,6 @@ async def keepLive(guild):
                                                                             async with session.get(url,headers=headers) as res:
                                                                                 print(res.status)
                                                                                 await asyncio.sleep(60)
-                                                        
-                                                        '''await RESULT['urlsCh'].create_thread(name=BASE_URL,content=BASE_URL)
-                                                        print(BASE_URL,'Ping success!')'''
                                                 else:
                                                     try:
                                                         await msg.delete()
