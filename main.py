@@ -94,38 +94,45 @@ async def keepLive(guild):
         async for msg in RESULT['rawCh'].history(oldest_first=True):
             BASE_URL=msg.content.strip().split(' || ')[0]
             print(BASE_URL+' processing')
+            isPaused=False
             async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar()) as session:
-                async with session.get(BASE_URL,headers=headers,allow_redirects=False) as res:
+                async with session.get(BASE_URL+'api/v2/app/status',headers=headers) as res:
                     if res.status<400:
-                        if not location:
-                            location=res.headers['location']
-                            headers['cookie']=''
-                            async with session.get(location,headers=headers,allow_redirects=False) as res:
-                                if res.status<400:
-                                    location=res.headers['location']
-                                    async with session.get(location,headers=headers,allow_redirects=False) as res:
-                                        if res.status<400:
-                                            location=res.headers['location']
-                                            async with session.get(location,headers=headers,allow_redirects=False) as res:
-                                                if res.status<400:
-                                                    async with session.get(location+'api/v2/app/context',headers=headers,allow_redirects=False) as res:
-                                                        if res.status<400:
-                                                            cookies = session.cookie_jar.filter_cookies(location)
-                                                            for key, cookie in cookies.items():
-                                                                headers['cookie'] += cookie.key +'='+cookie.value+';'
-                                                            async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
-                                                                print(BASE_URL,'Ping success!')
-                        else:
-                            async with session.get(BASE_URL+'api/v2/app/context',headers=headers,allow_redirects=False) as res:
-                                if res.status<400:
-                                    cookies = session.cookie_jar.filter_cookies(location)
-                                    for key, cookie in cookies.items():
-                                        headers['cookie'] += cookie.key +'='+cookie.value+';'
-                                    async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
-                                        print(BASE_URL,'Ping success!')
+                        js=await res.json()
+                        if js['status']==5:
+                            isPaused=True
+                if not isPaused:
+                    async with session.get(BASE_URL,headers=headers,allow_redirects=False) as res:
+                        if res.status<400:
+                            if not location:
+                                location=res.headers['location']
+                                headers['cookie']=''
+                                async with session.get(location,headers=headers,allow_redirects=False) as res:
+                                    if res.status<400:
+                                        location=res.headers['location']
+                                        async with session.get(location,headers=headers,allow_redirects=False) as res:
+                                            if res.status<400:
+                                                location=res.headers['location']
+                                                async with session.get(location,headers=headers,allow_redirects=False) as res:
+                                                    if res.status<400:
+                                                        async with session.get(location+'api/v2/app/context',headers=headers,allow_redirects=False) as res:
+                                                            if res.status<400:
+                                                                cookies = session.cookie_jar.filter_cookies(location)
+                                                                for key, cookie in cookies.items():
+                                                                    headers['cookie'] += cookie.key +'='+cookie.value+';'
+                                                                async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
+                                                                    print(BASE_URL,'Ping success!')
+                            else:
+                                async with session.get(BASE_URL+'api/v2/app/context',headers=headers,allow_redirects=False) as res:
+                                    if res.status<400:
+                                        cookies = session.cookie_jar.filter_cookies(location)
+                                        for key, cookie in cookies.items():
+                                            headers['cookie'] += cookie.key +'='+cookie.value+';'
+                                        async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
+                                            print(BASE_URL,'Ping success!')
             id=int(msg.content.strip().split(' || ')[1])
             for member in guild.members:
-                if id==member.id and str(member.status)=='offline':
+                if id==member.id and str(member.status)=='offline' or isPaused:
                     async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar()) as session:
                         async with session.get(BASE_URL,headers=headers,allow_redirects=False) as res:
                             if res.status<400:
