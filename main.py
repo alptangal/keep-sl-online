@@ -35,6 +35,7 @@ async def on_ready():
             raise Exception("Server not response")
         sys.exit("Exited")
     except Exception as error:
+        print(error)
         server.b()  
         guild = client.get_guild(GUILD_ID)
         RESULT=await getBasic(guild)
