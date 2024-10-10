@@ -51,7 +51,7 @@ async def on_ready():
         if not keepLive.is_running():
             keepLive.start(guild)
         if not restartVM.is_running():
-            restartVM.start(guild)
+            restartVM.start()
             
 @tasks.loop(hours=RESTART_LOOP)
 async def restartVM():
