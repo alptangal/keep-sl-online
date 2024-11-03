@@ -321,9 +321,7 @@ async def keepLive(guild):
                                 else:
                                     location=BASE_URL
                                     async with session.get(location+'api/v2/app/context',headers=headers,allow_redirects=False) as res:
-                                        print(BASE_URL,location,res.status,headers)
                                         if res.status<400:
-                                            
                                             cookies = session.cookie_jar.filter_cookies(location)
                                             for key, cookie in cookies.items():
                                                 headers['cookie'] += cookie.key +'='+cookie.value+';'
