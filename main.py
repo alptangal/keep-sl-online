@@ -412,4 +412,4 @@ async def keepLive(guild):
                     
             
 
-client.run('MTI0NzQ3MDQ4MjE4MjI0MjM2NA.G3Uhbz.CRpYfkp2J7jr992rdr5zTq0dym94Wx8QuaaW1I')#os.environ.get('botToken'))
+client.run(os.environ.get('botToken'))
