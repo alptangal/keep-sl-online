@@ -252,6 +252,7 @@ async def keepLive(guild):
                                                                 async with session.get(BASE_URL+'api/v2/app/disambiguate',headers=headers) as res:
                                                                     print(BASE_URL,'Ping success!')
                             else:
+                                location=BASE_URL
                                 async with session.get(BASE_URL+'api/v2/app/context',headers=headers,allow_redirects=False) as res:
                                     if res.status<400:
                                         cookies = session.cookie_jar.filter_cookies(location)
@@ -262,6 +263,7 @@ async def keepLive(guild):
             id=int(msg.content.strip().split(' || ')[1])
             for member in guild.members:
                 if id==member.id and str(member.status)=='offline' or isPaused:
+                    
                     async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar()) as session:
                         async with session.get(BASE_URL,headers=headers,allow_redirects=False) as res:
                             if res.status<400:
@@ -317,8 +319,11 @@ async def keepLive(guild):
                                                                                 print(error,3333)
                                                                                 pass
                                 else:
+                                    location=BASE_URL
                                     async with session.get(location+'api/v2/app/context',headers=headers,allow_redirects=False) as res:
+                                        print(BASE_URL,location,res.status,headers)
                                         if res.status<400:
+                                            
                                             cookies = session.cookie_jar.filter_cookies(location)
                                             for key, cookie in cookies.items():
                                                 headers['cookie'] += cookie.key +'='+cookie.value+';'
