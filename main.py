@@ -413,7 +413,7 @@ async def keepLive(guild):
     except Exception as error:
         RESULT=await getBasic(guild)
         print(error,112233)
-        pass       
-    
+        pass
+    #11111
 
 client.run(os.environ.get('botToken'))
