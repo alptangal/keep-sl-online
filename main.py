@@ -414,5 +414,6 @@ async def keepLive(guild):
         RESULT=await getBasic(guild)
         print(error,112233)
         pass       
+    
 
 client.run(os.environ.get('botToken'))
