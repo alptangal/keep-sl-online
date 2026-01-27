@@ -25,8 +25,11 @@ intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 RESULT = None
 URL_STREAM='https://keep-sl-online-d7bnwfpjbw9cw23yreygwk.streamlit.app/'
-RESTART_LOOP=random.randrange(24,72,1)#12,18,1)
+RESTART_LOOP=random.randrange(12,18,1)
 NEXT_TIME=False
+authorizations=json.loads(os.getenv('authorizations').replace("'",'"'))
+
+
 @client.event
 async def on_ready():
     global RESULT,GUILD_ID
@@ -102,8 +105,12 @@ async def restartVM():
                                                                                     i+=1
                                                                     else:
                                                                         url=URL_STREAM+'api/v2/app/restart'
-                                                                        async with session.post(URL_STREAM,headers=headers) as res:
-                                                                            print(url,res.status,2222222)
+                                                                        for author in authorizations:
+                                                                            async with session.post(URL_STREAM,headers={
+                                                                                'cookie':author['cookie'],
+                                                                                'x-csrf-token':author['csrf_token']
+                                                                            }) as res:
+                                                                                print(url,res.status,2222222)
                                                                     async with session.get(URL_STREAM,headers=headers) as res:
                                                                         print(res.status)
                     else:
