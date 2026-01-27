@@ -27,7 +27,7 @@ RESULT = None
 URL_STREAM='https://keep-sl-online-d7bnwfpjbw9cw23yreygwk.streamlit.app/'
 RESTART_LOOP=random.randrange(24,72,1)#12,18,1)
 NEXT_TIME=False
-authorizations=json.loads(os.getenv('authorizations'))
+authorizations=json.loads(os.getenv('authorizations').replace("'",'"'))
 
 
 @client.event
