@@ -25,7 +25,7 @@ intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 RESULT = None
 URL_STREAM='https://keep-sl-online-d7bnwfpjbw9cw23yreygwk.streamlit.app/'
-RESTART_LOOP=random.randrange(12,18,1)
+RESTART_LOOP=random.randrange(24,72,1)#12,18,1)
 NEXT_TIME=False
 @client.event
 async def on_ready():
