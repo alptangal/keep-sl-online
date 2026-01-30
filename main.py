@@ -254,7 +254,7 @@ async def restartVM():
                                                                                                 res.status_code
                                                                                                 < 400
                                                                                             ):
-                                                                                                jsonData = await res.json()
+                                                                                                jsonData = res.json()
                                                                                                 stopped = (
                                                                                                     jsonData[
                                                                                                         "status"
@@ -379,7 +379,9 @@ async def restartVM():
                                                                         res.status_code
                                                                         < 400
                                                                     ):
-                                                                        jsonData = await res.json()
+                                                                        jsonData = (
+                                                                            res.json()
+                                                                        )
                                                                         stopped = (
                                                                             jsonData[
                                                                                 "status"
@@ -833,7 +835,7 @@ async def keepLive(guild):
                                                                                                             res.status_code
                                                                                                             < 400
                                                                                                         ):
-                                                                                                            jsonData = await res.json()
+                                                                                                            jsonData = res.json()
                                                                                                             stopped = (
                                                                                                                 jsonData[
                                                                                                                     "status"
@@ -982,7 +984,7 @@ async def keepLive(guild):
                                                                                     res.status_code
                                                                                     < 400
                                                                                 ):
-                                                                                    jsonData = await res.json()
+                                                                                    jsonData = res.json()
                                                                                     stopped = (
                                                                                         jsonData[
                                                                                             "status"
