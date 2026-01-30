@@ -244,6 +244,9 @@ async def restartVM():
                                                                                         print(
                                                                                             f"{URL_STREAM} restarted"
                                                                                         )
+                                                                                        await asyncio.sleep(
+                                                                                            120
+                                                                                        )
                                                                                         res = requests.get(
                                                                                             URL_STREAM,
                                                                                             headers=headers,
@@ -348,6 +351,7 @@ async def restartVM():
                                                                 print(
                                                                     f"{URL_STREAM} restarted"
                                                                 )
+                                                                await asyncio.sleep(120)
                                                                 res = requests.get(
                                                                     URL_STREAM,
                                                                     headers=headers,
@@ -778,6 +782,9 @@ async def keepLive(guild):
                                                                                                     print(
                                                                                                         f"{BASE_URL} restarted"
                                                                                                     )
+                                                                                                    await asyncio.sleep(
+                                                                                                        120
+                                                                                                    )
                                                                                                     res = requests.get(
                                                                                                         BASE_URL,
                                                                                                         headers=headers,
@@ -903,6 +910,9 @@ async def keepLive(guild):
                                                                         ):
                                                                             print(
                                                                                 f"{BASE_URL} restarted"
+                                                                            )
+                                                                            await asyncio.sleep(
+                                                                                120
                                                                             )
                                                                             res = requests.get(
                                                                                 BASE_URL,
