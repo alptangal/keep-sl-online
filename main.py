@@ -542,110 +542,110 @@ async def keepLive(guild):
             headers = {
                 "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0"
             }
-            # async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar()) as session:
-            #     async with session.get(
-            #         BASE_URL + "api/v2/app/status", headers=headers
-            #     ) as res:
-            #         if res.status < 400:
-            #             js = await res.json()
-            #             if js["status"] != 5:
-            #                 isPaused = True
-            #     if not isPaused:
-            #         async with session.get(
-            #             BASE_URL, headers=headers, allow_redirects=False
-            #         ) as res:
-            #             if res.status < 400:
-            #                 headers["cookie"] = ""
-            #                 if not location:
-            #                     location = res.headers["location"]
-            #                     #
-            #                     async with session.get(
-            #                         location, headers=headers, allow_redirects=False
-            #                     ) as res:
-            #                         if res.status < 400:
-            #                             location = res.headers["location"]
-            #                             async with session.get(
-            #                                 location,
-            #                                 headers=headers,
-            #                                 allow_redirects=False,
-            #                             ) as res:
-            #                                 if res.status < 400:
-            #                                     location = res.headers["location"]
-            #                                     async with session.get(
-            #                                         location,
-            #                                         headers=headers,
-            #                                         allow_redirects=False,
-            #                                     ) as res:
-            #                                         if res.status < 400:
-            #                                             async with session.get(
-            #                                                 location
-            #                                                 + "api/v2/app/context",
-            #                                                 headers=headers,
-            #                                                 allow_redirects=False,
-            #                                             ) as res:
-            #                                                 if res.status < 400:
-            #                                                     print(session)
-            #                                                     cookies = session.cookie_jar.filter_cookies(
-            #                                                         URL(location)
-            #                                                     )
-            #                                                     for (
-            #                                                         key,
-            #                                                         cookie,
-            #                                                     ) in cookies.items():
-            #                                                         headers[
-            #                                                             "cookie"
-            #                                                         ] += (
-            #                                                             cookie.key
-            #                                                             + "="
-            #                                                             + cookie.value
-            #                                                             + ";"
-            #                                                         )
-            #                                                     async with session.get(
-            #                                                         BASE_URL
-            #                                                         + "api/v2/app/disambiguate",
-            #                                                         headers=headers,
-            #                                                     ) as res:
-            #                                                         print(
-            #                                                             BASE_URL,
-            #                                                             "Ping success!1111111",
-            #                                                         )
-            #                 else:
-            #                     location = res.headers["location"]
-            #                     async with session.get(
-            #                         location, headers=headers, allow_redirects=False
-            #                     ) as res:
-            #                         if res.status < 400:
-            #                             cookies = session.cookie_jar.filter_cookies(
-            #                                 URL(location)
-            #                             )
-            #                             for key, cookie in cookies.items():
-            #                                 headers["cookie"] += (
-            #                                     cookie.key + "=" + cookie.value + ";"
-            #                                 )
-            #                             async with session.get(
-            #                                 BASE_URL + "api/v2/app/context",
-            #                                 headers=headers,
-            #                                 allow_redirects=False,
-            #                             ) as res:
-            #                                 if res.status < 400:
-            #                                     cookies = (
-            #                                         session.cookie_jar.filter_cookies(
-            #                                             URL(location)
-            #                                         )
-            #                                     )
-            #                                     for key, cookie in cookies.items():
-            #                                         headers["cookie"] += (
-            #                                             cookie.key
-            #                                             + "="
-            #                                             + cookie.value
-            #                                             + ";"
-            #                                         )
-            #                                     async with session.get(
-            #                                         BASE_URL
-            #                                         + "api/v2/app/disambiguate",
-            #                                         headers=headers,
-            #                                     ) as res:
-            #                                         print(BASE_URL, "Ping success!")
+            async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar()) as session:
+                async with session.get(
+                    BASE_URL + "api/v2/app/status", headers=headers
+                ) as res:
+                    if res.status < 400:
+                        js = await res.json()
+                        if js["status"] != 5:
+                            isPaused = True
+                if not isPaused:
+                    async with session.get(
+                        BASE_URL, headers=headers, allow_redirects=False
+                    ) as res:
+                        if res.status < 400:
+                            headers["cookie"] = ""
+                            if not location:
+                                location = res.headers["location"]
+                                #
+                                async with session.get(
+                                    location, headers=headers, allow_redirects=False
+                                ) as res:
+                                    if res.status < 400:
+                                        location = res.headers["location"]
+                                        async with session.get(
+                                            location,
+                                            headers=headers,
+                                            allow_redirects=False,
+                                        ) as res:
+                                            if res.status < 400:
+                                                location = res.headers["location"]
+                                                async with session.get(
+                                                    location,
+                                                    headers=headers,
+                                                    allow_redirects=False,
+                                                ) as res:
+                                                    if res.status < 400:
+                                                        async with session.get(
+                                                            location
+                                                            + "api/v2/app/context",
+                                                            headers=headers,
+                                                            allow_redirects=False,
+                                                        ) as res:
+                                                            if res.status < 400:
+                                                                print(session)
+                                                                cookies = session.cookie_jar.filter_cookies(
+                                                                    URL(location)
+                                                                )
+                                                                for (
+                                                                    key,
+                                                                    cookie,
+                                                                ) in cookies.items():
+                                                                    headers[
+                                                                        "cookie"
+                                                                    ] += (
+                                                                        cookie.key
+                                                                        + "="
+                                                                        + cookie.value
+                                                                        + ";"
+                                                                    )
+                                                                async with session.get(
+                                                                    BASE_URL
+                                                                    + "api/v2/app/disambiguate",
+                                                                    headers=headers,
+                                                                ) as res:
+                                                                    print(
+                                                                        BASE_URL,
+                                                                        "Ping success!1111111",
+                                                                    )
+                            else:
+                                location = res.headers["location"]
+                                async with session.get(
+                                    location, headers=headers, allow_redirects=False
+                                ) as res:
+                                    if res.status < 400:
+                                        cookies = session.cookie_jar.filter_cookies(
+                                            URL(location)
+                                        )
+                                        for key, cookie in cookies.items():
+                                            headers["cookie"] += (
+                                                cookie.key + "=" + cookie.value + ";"
+                                            )
+                                        async with session.get(
+                                            BASE_URL + "api/v2/app/context",
+                                            headers=headers,
+                                            allow_redirects=False,
+                                        ) as res:
+                                            if res.status < 400:
+                                                cookies = (
+                                                    session.cookie_jar.filter_cookies(
+                                                        URL(location)
+                                                    )
+                                                )
+                                                for key, cookie in cookies.items():
+                                                    headers["cookie"] += (
+                                                        cookie.key
+                                                        + "="
+                                                        + cookie.value
+                                                        + ";"
+                                                    )
+                                                async with session.get(
+                                                    BASE_URL
+                                                    + "api/v2/app/disambiguate",
+                                                    headers=headers,
+                                                ) as res:
+                                                    print(BASE_URL, "Ping success!")
             id = int(msg.content.strip().split(" || ")[1])
 
             for member in guild.members:
