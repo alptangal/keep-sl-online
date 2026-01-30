@@ -244,16 +244,34 @@ async def restartVM():
                                                                                         print(
                                                                                             f"{URL_STREAM} restarted"
                                                                                         )
-                                                                                        await asyncio.sleep(
-                                                                                            120
-                                                                                        )
-                                                                                        res = requests.get(
-                                                                                            URL_STREAM,
-                                                                                            headers=headers,
-                                                                                        )
-                                                                                        print(
-                                                                                            res.status_code
-                                                                                        )
+                                                                                        stopped = False
+                                                                                        while not stopped:
+                                                                                            res = requests.get(
+                                                                                                url,
+                                                                                                headers=headers,
+                                                                                            )
+                                                                                            if (
+                                                                                                res.status_code
+                                                                                                < 400
+                                                                                            ):
+                                                                                                jsonData = await res.json()
+                                                                                                stopped = (
+                                                                                                    jsonData[
+                                                                                                        "status"
+                                                                                                    ]
+                                                                                                    == 5
+                                                                                                )
+                                                                                                print(
+                                                                                                    f"{URL_STREAM} is running"
+                                                                                                )
+                                                                                            else:
+                                                                                                print(
+                                                                                                    f"Error: {res.status_code}"
+                                                                                                )
+                                                                                                stopped = True
+                                                                                            await asyncio.sleep(
+                                                                                                1
+                                                                                            )
                                                                                     else:
                                                                                         print(
                                                                                             f"{URL_STREAM} restart failed"
@@ -351,12 +369,34 @@ async def restartVM():
                                                                 print(
                                                                     f"{URL_STREAM} restarted"
                                                                 )
-                                                                await asyncio.sleep(120)
-                                                                res = requests.get(
-                                                                    URL_STREAM,
-                                                                    headers=headers,
-                                                                )
-                                                                print(res.status_code)
+                                                                stopped = False
+                                                                while not stopped:
+                                                                    res = requests.get(
+                                                                        url,
+                                                                        headers=headers,
+                                                                    )
+                                                                    if (
+                                                                        res.status_code
+                                                                        < 400
+                                                                    ):
+                                                                        jsonData = await res.json()
+                                                                        stopped = (
+                                                                            jsonData[
+                                                                                "status"
+                                                                            ]
+                                                                            == 5
+                                                                        )
+                                                                        print(
+                                                                            f"{URL_STREAM} is running"
+                                                                        )
+                                                                    else:
+                                                                        print(
+                                                                            f"Error: {res.status_code}"
+                                                                        )
+                                                                        stopped = True
+                                                                    await asyncio.sleep(
+                                                                        1
+                                                                    )
                                                             else:
                                                                 print(
                                                                     f"{URL_STREAM} restart failed"
@@ -782,16 +822,35 @@ async def keepLive(guild):
                                                                                                     print(
                                                                                                         f"{BASE_URL} restarted"
                                                                                                     )
-                                                                                                    await asyncio.sleep(
-                                                                                                        120
-                                                                                                    )
-                                                                                                    res = requests.get(
-                                                                                                        BASE_URL,
-                                                                                                        headers=headers,
-                                                                                                    )
-                                                                                                    print(
-                                                                                                        res.status_code
-                                                                                                    )
+                                                                                                    url = f"{BASE_URL}api/v2/app/status"
+                                                                                                    stopped = False
+                                                                                                    while not stopped:
+                                                                                                        res = requests.get(
+                                                                                                            url,
+                                                                                                            headers=headers,
+                                                                                                        )
+                                                                                                        if (
+                                                                                                            res.status_code
+                                                                                                            < 400
+                                                                                                        ):
+                                                                                                            jsonData = await res.json()
+                                                                                                            stopped = (
+                                                                                                                jsonData[
+                                                                                                                    "status"
+                                                                                                                ]
+                                                                                                                == 5
+                                                                                                            )
+                                                                                                            print(
+                                                                                                                f"{BASE_URL} is running"
+                                                                                                            )
+                                                                                                        else:
+                                                                                                            print(
+                                                                                                                f"Error: {res.status_code}"
+                                                                                                            )
+                                                                                                            stopped = True
+                                                                                                        await asyncio.sleep(
+                                                                                                            1
+                                                                                                        )
                                                                                                 else:
                                                                                                     print(
                                                                                                         f"{BASE_URL} restart failed"
@@ -911,16 +970,36 @@ async def keepLive(guild):
                                                                             print(
                                                                                 f"{BASE_URL} restarted"
                                                                             )
-                                                                            await asyncio.sleep(
-                                                                                120
+                                                                            stopped = (
+                                                                                False
                                                                             )
-                                                                            res = requests.get(
-                                                                                BASE_URL,
-                                                                                headers=headers,
-                                                                            )
-                                                                            print(
-                                                                                res.status_code
-                                                                            )
+                                                                            while not stopped:
+                                                                                res = requests.get(
+                                                                                    url,
+                                                                                    headers=headers,
+                                                                                )
+                                                                                if (
+                                                                                    res.status_code
+                                                                                    < 400
+                                                                                ):
+                                                                                    jsonData = await res.json()
+                                                                                    stopped = (
+                                                                                        jsonData[
+                                                                                            "status"
+                                                                                        ]
+                                                                                        == 5
+                                                                                    )
+                                                                                    print(
+                                                                                        f"{BASE_URL} is running"
+                                                                                    )
+                                                                                else:
+                                                                                    print(
+                                                                                        f"Error: {res.status_code}"
+                                                                                    )
+                                                                                    stopped = True
+                                                                                await asyncio.sleep(
+                                                                                    1
+                                                                                )
                                                                         else:
                                                                             print(
                                                                                 f"{BASE_URL} restart failed"
