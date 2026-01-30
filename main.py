@@ -34,7 +34,8 @@ client = discord.Client(intents=intents)
 RESULT = None
 URL_STREAM = "https://keep-sl-online-d7bnwfpjbw9cw23yreygwk.streamlit.app/"
 RESTART_LOOP = random.randrange(12, 18, 1)
-NEXT_TIME = True
+NEXT_TIME = False
+authorizations = json.loads(os.getenv("authorizations").replace("'", '"'))
 
 
 @client.event
@@ -478,7 +479,8 @@ async def updateUrl():
                                                 BASE_URL, headers=headers
                                             ) as res:
                                                 print(BASE_URL, "Ping success!")
-    except:
+    except Exception as e:
+        print(f"Error:{e}")
         pass
 
 
@@ -486,7 +488,6 @@ async def updateUrl():
 async def keepLive(guild):
     global RESULT
     location = None
-
     try:
         async for msg in RESULT["rawCh"].history():
             BASE_URL = msg.content.strip().split(" || ")[0]
@@ -985,7 +986,6 @@ async def keepLive(guild):
         RESULT = await getBasic(guild)
         print(error, 112233)
         pass
-    # 11111
 
 
 client.run(os.environ.get("botToken"))
