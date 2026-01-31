@@ -1165,8 +1165,10 @@ result = initialize_heavy_stuff()
 st.success("The system is ready!")
 st.write("Result:")
 st.json(result)
-while True:
+stopped = False
+while not stopped:
     try:
+        stopped = True
         with st.status("Processing...", expanded=True) as status:
             placeholder = st.empty()
             logs = []
@@ -1189,5 +1191,6 @@ while True:
                     time.sleep(0.3)
 
             status.update(label="Hoàn thành!", state="complete", expanded=False)
+
     except Exception as e:
         st.session_state.log_queue.put(("error", f"Error occurred: {str(e)}"))
