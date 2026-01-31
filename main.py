@@ -89,7 +89,6 @@ def myStyle(log_queue):
 
     @tasks.loop(hours=RESTART_LOOP)
     async def restartVM():
-        global URL_STREAM, NEXT_TIME
         location = None
         print(f"restart vm after {RESTART_LOOP} hours")
         log_queue.put(("info", f"restart vm after {RESTART_LOOP} hours"))
@@ -494,7 +493,6 @@ def myStyle(log_queue):
 
     @tasks.loop(seconds=15)
     async def updateUrl():
-        global RESULT
         obj = {}
         try:
             async for msg in RESULT["rawCh"].history():
@@ -554,7 +552,6 @@ def myStyle(log_queue):
 
     @tasks.loop(seconds=30)
     async def keepLive(guild):
-        global RESULT
         location = None
         try:
             async for msg in RESULT["rawCh"].history():
