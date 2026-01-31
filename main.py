@@ -1161,6 +1161,10 @@ st.title("my style")
 
 # Dòng này đảm bảo: chạy 1 lần duy nhất, mọi user đều dùng chung kết quả
 result = initialize_heavy_stuff()
+
+st.success("The system is ready!")
+st.write("Result:")
+st.json(result)
 with st.status("Processing...", expanded=True) as status:
     placeholder = st.empty()
     logs = []
@@ -1183,6 +1187,3 @@ with st.status("Processing...", expanded=True) as status:
             time.sleep(0.3)
 
     status.update(label="Hoàn thành!", state="complete", expanded=False)
-st.success("The system is ready!")
-st.write("Result:")
-st.json(result)
