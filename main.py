@@ -33,27 +33,28 @@ if "logs" not in st.session_state:
 
 if "task_running" not in st.session_state:
     st.session_state["task_running"] = False
+GUILD_ID = 1122707918177960047
+BOT_NAME = "shopee"
+SESSION_ID = None
+SESSION_ID_OLD = None
+LAST_UPDATE = None
+LAST_MSG = None
+HEADERS = []
+
+RESULT = None
+URL_STREAM = "https://keep-sl-online-d7bnwfpjbw9cw23yreygwk.streamlit.app/"
+RESTART_LOOP = random.randrange(12, 18, 1)
+NEXT_TIME = False
 
 
 def myStyle(log_queue):
     intents = discord.Intents.all()
     client = discord.Client(intents=intents)
     authorizations = json.loads(str(os.getenv("authorizations")).replace("'", '"'))
-    GUILD_ID = 1122707918177960047
-    BOT_NAME = "shopee"
-    SESSION_ID = None
-    SESSION_ID_OLD = None
-    LAST_UPDATE = None
-    LAST_MSG = None
-    HEADERS = []
-
-    RESULT = None
-    URL_STREAM = "https://keep-sl-online-d7bnwfpjbw9cw23yreygwk.streamlit.app/"
-    RESTART_LOOP = random.randrange(12, 18, 1)
-    NEXT_TIME = False
 
     @client.event
     async def on_ready():
+        global RESULT
         # try:
         #     req = requests.get("http://localhost:8888")
         #     if (
@@ -66,29 +67,34 @@ def myStyle(log_queue):
         # except Exception as error:
         #     print(error)
         #     server.b()
-        guild = client.get_guild(GUILD_ID)
-        RESULT = await getBasic(guild)
-        overwrites = {
-            guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            guild.me: discord.PermissionOverwrite(read_messages=True),
-        }
-        if "streamlit" not in str(RESULT):
-            RESULT["streamlitCate"] = await guild.create_category(
-                name="streamlit", overwrites=overwrites
-            )
-            RESULT["urlsCh"] = await RESULT["streamlitCate"].create_forum(
-                name="urls", overwrites=overwrites
-            )
-            RESULT["rawCh"] = await RESULT["streamlitCate"].create_text_channel(
-                name="raw", overwrites=overwrites
-            )
-        if not keepLive.is_running():
-            keepLive.start(guild)
-        if not restartVM.is_running():
-            restartVM.start()
+        guild = None
+        for g in client.guilds:
+            if g.name == "llyllr's server":
+                guild = g
+        if guild:
+            RESULT = await getBasic(guild)
+            overwrites = {
+                guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                guild.me: discord.PermissionOverwrite(read_messages=True),
+            }
+            if "streamlit" not in str(RESULT):
+                RESULT["streamlitCate"] = await guild.create_category(
+                    name="streamlit", overwrites=overwrites
+                )
+                RESULT["urlsCh"] = await RESULT["streamlitCate"].create_forum(
+                    name="urls", overwrites=overwrites
+                )
+                RESULT["rawCh"] = await RESULT["streamlitCate"].create_text_channel(
+                    name="raw", overwrites=overwrites
+                )
+            if not keepLive.is_running():
+                keepLive.start(guild)
+            if not restartVM.is_running():
+                restartVM.start()
 
     @tasks.loop(hours=RESTART_LOOP)
     async def restartVM():
+        global URL_STREAM, NEXT_TIME
         location = None
         print(f"restart vm after {RESTART_LOOP} hours")
         log_queue.put(("info", f"restart vm after {RESTART_LOOP} hours"))
@@ -493,6 +499,7 @@ def myStyle(log_queue):
 
     @tasks.loop(seconds=15)
     async def updateUrl():
+        global RESULT
         obj = {}
         try:
             async for msg in RESULT["rawCh"].history():
@@ -552,6 +559,7 @@ def myStyle(log_queue):
 
     @tasks.loop(seconds=30)
     async def keepLive(guild):
+        global RESULT
         location = None
         try:
             async for msg in RESULT["rawCh"].history():
