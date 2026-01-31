@@ -54,7 +54,6 @@ def myStyle(log_queue):
 
     @client.event
     async def on_ready():
-        global RESULT, GUILD_ID
         # try:
         #     req = requests.get("http://localhost:8888")
         #     if (
