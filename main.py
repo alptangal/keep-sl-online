@@ -33,26 +33,26 @@ if "logs" not in st.session_state:
 
 if "task_running" not in st.session_state:
     st.session_state["task_running"] = False
-authorizations = json.loads(str(os.getenv("authorizations")).replace("'", '"'))
-
-
-GUILD_ID = 1122707918177960047
-BOT_NAME = "shopee"
-SESSION_ID = None
-SESSION_ID_OLD = None
-LAST_UPDATE = None
-LAST_MSG = None
-HEADERS = []
-intents = discord.Intents.all()
-client = discord.Client(intents=intents)
-RESULT = None
-URL_STREAM = "https://keep-sl-online-d7bnwfpjbw9cw23yreygwk.streamlit.app/"
-RESTART_LOOP = random.randrange(12, 18, 1)
-NEXT_TIME = False
-authorizations = json.loads(os.getenv("authorizations").replace("'", '"'))
 
 
 def myStyle(log_queue):
+    intents = discord.Intents.all()
+    client = discord.Client(intents=intents)
+    authorizations = json.loads(str(os.getenv("authorizations")).replace("'", '"'))
+
+    GUILD_ID = 1122707918177960047
+    BOT_NAME = "shopee"
+    SESSION_ID = None
+    SESSION_ID_OLD = None
+    LAST_UPDATE = None
+    LAST_MSG = None
+    HEADERS = []
+
+    RESULT = None
+    URL_STREAM = "https://keep-sl-online-d7bnwfpjbw9cw23yreygwk.streamlit.app/"
+    RESTART_LOOP = random.randrange(12, 18, 1)
+    NEXT_TIME = False
+
     @client.event
     async def on_ready():
         global RESULT, GUILD_ID
