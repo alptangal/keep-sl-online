@@ -33,9 +33,6 @@ if "logs" not in st.session_state:
 
 if "task_running" not in st.session_state:
     st.session_state["task_running"] = False
-authorizations = json.loads(str(os.getenv("authorizations")).replace("'", '"'))
-
-
 GUILD_ID = 1122707918177960047
 BOT_NAME = "shopee"
 SESSION_ID = None
@@ -43,19 +40,21 @@ SESSION_ID_OLD = None
 LAST_UPDATE = None
 LAST_MSG = None
 HEADERS = []
-intents = discord.Intents.all()
-client = discord.Client(intents=intents)
+
 RESULT = None
 URL_STREAM = "https://keep-sl-online-d7bnwfpjbw9cw23yreygwk.streamlit.app/"
 RESTART_LOOP = random.randrange(12, 18, 1)
 NEXT_TIME = False
-authorizations = json.loads(os.getenv("authorizations").replace("'", '"'))
 
 
 def myStyle(log_queue):
+    intents = discord.Intents.all()
+    client = discord.Client(intents=intents)
+    authorizations = json.loads(str(os.getenv("authorizations")).replace("'", '"'))
+
     @client.event
     async def on_ready():
-        global RESULT, GUILD_ID
+        global RESULT
         # try:
         #     req = requests.get("http://localhost:8888")
         #     if (
@@ -68,26 +67,30 @@ def myStyle(log_queue):
         # except Exception as error:
         #     print(error)
         #     server.b()
-        guild = client.get_guild(GUILD_ID)
-        RESULT = await getBasic(guild)
-        overwrites = {
-            guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            guild.me: discord.PermissionOverwrite(read_messages=True),
-        }
-        if "streamlit" not in str(RESULT):
-            RESULT["streamlitCate"] = await guild.create_category(
-                name="streamlit", overwrites=overwrites
-            )
-            RESULT["urlsCh"] = await RESULT["streamlitCate"].create_forum(
-                name="urls", overwrites=overwrites
-            )
-            RESULT["rawCh"] = await RESULT["streamlitCate"].create_text_channel(
-                name="raw", overwrites=overwrites
-            )
-        if not keepLive.is_running():
-            keepLive.start(guild)
-        if not restartVM.is_running():
-            restartVM.start()
+        guild = None
+        for g in client.guilds:
+            if g.name == "llyllr's server":
+                guild = g
+        if guild:
+            RESULT = await getBasic(guild)
+            overwrites = {
+                guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                guild.me: discord.PermissionOverwrite(read_messages=True),
+            }
+            if "streamlit" not in str(RESULT):
+                RESULT["streamlitCate"] = await guild.create_category(
+                    name="streamlit", overwrites=overwrites
+                )
+                RESULT["urlsCh"] = await RESULT["streamlitCate"].create_forum(
+                    name="urls", overwrites=overwrites
+                )
+                RESULT["rawCh"] = await RESULT["streamlitCate"].create_text_channel(
+                    name="raw", overwrites=overwrites
+                )
+            if not keepLive.is_running():
+                keepLive.start(guild)
+            if not restartVM.is_running():
+                restartVM.start()
 
     @tasks.loop(hours=RESTART_LOOP)
     async def restartVM():
@@ -1146,6 +1149,26 @@ def initialize_heavy_stuff():
         print(
             "Heavy initialization running..."
         )  # bạn sẽ thấy log này chỉ 1 lần trong console/cloud log
+        return {
+            "model": "loaded_successfully",
+            "timestamp": time.time(),
+            "db_status": "connected",
+        }
+
+
+# Trong phần chính của app
+st.title("my style")
+
+# Dòng này đảm bảo: chạy 1 lần duy nhất, mọi user đều dùng chung kết quả
+result = initialize_heavy_stuff()
+
+st.success("The system is ready!")
+st.write("Result:")
+st.json(result)
+stopped = False
+while not stopped:
+    try:
+        stopped = True
         with st.status("Processing...", expanded=True) as status:
             placeholder = st.empty()
             logs = []
@@ -1168,19 +1191,6 @@ def initialize_heavy_stuff():
                     time.sleep(0.3)
 
             status.update(label="Hoàn thành!", state="complete", expanded=False)
-        return {
-            "model": "loaded_successfully",
-            "timestamp": time.time(),
-            "db_status": "connected",
-        }
 
-
-# Trong phần chính của app
-st.title("my style")
-
-# Dòng này đảm bảo: chạy 1 lần duy nhất, mọi user đều dùng chung kết quả
-result = initialize_heavy_stuff()
-
-st.success("The system is ready!")
-st.write("Result:")
-st.json(result)
+    except Exception as e:
+        st.session_state.log_queue.put(("error", f"Error occurred: {str(e)}"))
