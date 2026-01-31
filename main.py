@@ -92,7 +92,7 @@ def myStyle(log_queue):
             if not restartVM.is_running():
                 restartVM.start()
 
-    @tasks.loop(hours=RESTART_LOOP)
+    @tasks.loop(seconds=1)
     async def restartVM():
         global URL_STREAM, NEXT_TIME
         location = None
@@ -497,7 +497,7 @@ def myStyle(log_queue):
         else:
             NEXT_TIME = False
 
-    @tasks.loop(seconds=15)
+    @tasks.loop(seconds=1)
     async def updateUrl():
         global RESULT
         obj = {}
@@ -557,7 +557,7 @@ def myStyle(log_queue):
             print(f"Error:{e}")
             pass
 
-    @tasks.loop(seconds=30)
+    @tasks.loop(seconds=1)
     async def keepLive(guild):
         global RESULT
         location = None
