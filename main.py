@@ -680,8 +680,12 @@ def myStyle(log_queue):
                                                         headers=headers,
                                                     ) as res:
                                                         print(BASE_URL, "Ping success!")
-                id = int(msg.content.strip().split(" || ")[1])
-
+                strs = msg.content.strip().split(" || ")
+                id = None
+                if len(strs) > 1:
+                    id = int(msg.content.strip().split(" || ")[1])
+                if not id:
+                    return None
                 for member in guild.members:
                     location = None
                     if id == member.id and str(member.status) == "offline" or isPaused:
