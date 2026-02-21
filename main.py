@@ -251,49 +251,61 @@ def myStyle(log_queue):
                                                                                             "appId"
                                                                                         ]
                                                                                         url = f"https://share.streamlit.io/api/v2/apps/{appId}/restart"
-                                                                                        res = requests.post(
-                                                                                            url,
-                                                                                            headers=headers,
-                                                                                        )
-                                                                                        if (
-                                                                                            res.status_code
-                                                                                            == 204
+                                                                                        # res = requests.post(
+                                                                                        #     url,
+                                                                                        #     headers=headers,
+                                                                                        # )
+                                                                                        async with (
+                                                                                            session.post(
+                                                                                                url,
+                                                                                                headers=headers,
+                                                                                            ) as res
                                                                                         ):
-                                                                                            print(
-                                                                                                f"{URL_STREAM} restarted"
-                                                                                            )
-                                                                                            stopped = False
-                                                                                            while not stopped:
-                                                                                                res = requests.get(
-                                                                                                    url,
-                                                                                                    headers=headers,
+                                                                                            if (
+                                                                                                res.status
+                                                                                                == 204
+                                                                                            ):
+                                                                                                print(
+                                                                                                    f"{URL_STREAM} restarted"
                                                                                                 )
-                                                                                                if (
-                                                                                                    res.status_code
-                                                                                                    < 400
-                                                                                                ):
-                                                                                                    jsonData = res.json()
-                                                                                                    stopped = (
-                                                                                                        jsonData[
-                                                                                                            "status"
-                                                                                                        ]
-                                                                                                        == 5
+                                                                                                stopped = False
+                                                                                                while not stopped:
+                                                                                                    # res = requests.get(
+                                                                                                    #     url,
+                                                                                                    #     headers=headers,
+                                                                                                    # )
+                                                                                                    async with (
+                                                                                                        session.get(
+                                                                                                            url,
+                                                                                                            headers=headers,
+                                                                                                        ) as res
+                                                                                                    ):
+                                                                                                        if (
+                                                                                                            res.status
+                                                                                                            < 400
+                                                                                                        ):
+                                                                                                            jsonData = await res.json()
+                                                                                                            stopped = (
+                                                                                                                jsonData[
+                                                                                                                    "status"
+                                                                                                                ]
+                                                                                                                == 5
+                                                                                                            )
+                                                                                                            print(
+                                                                                                                f"{URL_STREAM} is running"
+                                                                                                            )
+                                                                                                        else:
+                                                                                                            print(
+                                                                                                                f"Error: {res.status}"
+                                                                                                            )
+                                                                                                            stopped = True
+                                                                                                    await asyncio.sleep(
+                                                                                                        1
                                                                                                     )
-                                                                                                    print(
-                                                                                                        f"{URL_STREAM} is running"
-                                                                                                    )
-                                                                                                else:
-                                                                                                    print(
-                                                                                                        f"Error: {res.status_code}"
-                                                                                                    )
-                                                                                                    stopped = True
-                                                                                                await asyncio.sleep(
-                                                                                                    1
+                                                                                            else:
+                                                                                                print(
+                                                                                                    f"{URL_STREAM} restart failed"
                                                                                                 )
-                                                                                        else:
-                                                                                            print(
-                                                                                                f"{URL_STREAM} restart failed"
-                                                                                            )
                                                                         async with (
                                                                             session.get(
                                                                                 URL_STREAM,
@@ -383,51 +395,61 @@ def myStyle(log_queue):
                                                                     "appId"
                                                                 ]
                                                                 url = f"https://share.streamlit.io/api/v2/apps/{appId}/restart"
-                                                                res = requests.post(
+                                                                # res = requests.post(
+                                                                #     url,
+                                                                #     headers=headers,
+                                                                # )
+                                                                async with session.post(
                                                                     url,
                                                                     headers=headers,
-                                                                )
-                                                                if (
-                                                                    res.status_code
-                                                                    == 204
-                                                                ):
-                                                                    print(
-                                                                        f"{URL_STREAM} restarted"
-                                                                    )
-                                                                    stopped = False
-                                                                    while not stopped:
-                                                                        res = requests.get(
-                                                                            url,
-                                                                            headers=headers,
+                                                                ) as res:
+                                                                    if (
+                                                                        res.status
+                                                                        == 204
+                                                                    ):
+                                                                        print(
+                                                                            f"{URL_STREAM} restarted"
                                                                         )
-                                                                        if (
-                                                                            res.status_code
-                                                                            < 400
+                                                                        stopped = False
+                                                                        while (
+                                                                            not stopped
                                                                         ):
-                                                                            jsonData = res.json()
-                                                                            stopped = (
-                                                                                jsonData[
-                                                                                    "status"
-                                                                                ]
-                                                                                == 5
+                                                                            # res = requests.get(
+                                                                            #     url,
+                                                                            #     headers=headers,
+                                                                            # )
+                                                                            async with (
+                                                                                session.get(
+                                                                                    url,
+                                                                                    headers=headers,
+                                                                                ) as res
+                                                                            ):
+                                                                                if (
+                                                                                    res.status
+                                                                                    < 400
+                                                                                ):
+                                                                                    jsonData = await res.json()
+                                                                                    stopped = (
+                                                                                        jsonData[
+                                                                                            "status"
+                                                                                        ]
+                                                                                        == 5
+                                                                                    )
+                                                                                    print(
+                                                                                        f"{URL_STREAM} is running"
+                                                                                    )
+                                                                                else:
+                                                                                    print(
+                                                                                        f"Error: {res.status}"
+                                                                                    )
+                                                                                    stopped = True
+                                                                            await asyncio.sleep(
+                                                                                1
                                                                             )
-                                                                            print(
-                                                                                f"{URL_STREAM} is running"
-                                                                            )
-                                                                        else:
-                                                                            print(
-                                                                                f"Error: {res.status_code}"
-                                                                            )
-                                                                            stopped = (
-                                                                                True
-                                                                            )
-                                                                        await asyncio.sleep(
-                                                                            1
+                                                                    else:
+                                                                        print(
+                                                                            f"{URL_STREAM} restart failed"
                                                                         )
-                                                                else:
-                                                                    print(
-                                                                        f"{URL_STREAM} restart failed"
-                                                                    )
                                                     # req = requests.post(
                                                     #     url, headers=headers
                                                     # )
@@ -546,9 +568,14 @@ def myStyle(log_queue):
                                                 js = await res.json()
                                                 if js["status"] != 5:
                                                     url = BASE_URL + "api/v2/app/resume"
-                                                    req = requests.post(
-                                                        url, headers=headers
-                                                    )
+                                                    # req = requests.post(
+                                                    #     url, headers=headers
+                                                    # )
+                                                    async with session.post(
+                                                        url,
+                                                        headers=headers,
+                                                    ) as res:
+                                                        print(res.status, 3333)
                                                 async with session.get(
                                                     BASE_URL, headers=headers
                                                 ) as res:
@@ -857,50 +884,62 @@ def myStyle(log_queue):
                                                                                                         "appId"
                                                                                                     ]
                                                                                                     url = f"https://share.streamlit.io/api/v2/apps/{appId}/restart"
-                                                                                                    res = requests.post(
-                                                                                                        url,
-                                                                                                        headers=headers,
-                                                                                                    )
-                                                                                                    if (
-                                                                                                        res.status_code
-                                                                                                        == 204
+                                                                                                    # res = requests.post(
+                                                                                                    #     url,
+                                                                                                    #     headers=headers,
+                                                                                                    # )
+                                                                                                    async with (
+                                                                                                        session.post(
+                                                                                                            url,
+                                                                                                            headers=headers,
+                                                                                                        ) as res
                                                                                                     ):
-                                                                                                        print(
-                                                                                                            f"{BASE_URL} restarted"
-                                                                                                        )
-                                                                                                        url = f"{BASE_URL}api/v2/app/status"
-                                                                                                        stopped = False
-                                                                                                        while not stopped:
-                                                                                                            res = requests.get(
-                                                                                                                url,
-                                                                                                                headers=headers,
+                                                                                                        if (
+                                                                                                            res.status
+                                                                                                            == 204
+                                                                                                        ):
+                                                                                                            print(
+                                                                                                                f"{BASE_URL} restarted"
                                                                                                             )
-                                                                                                            if (
-                                                                                                                res.status_code
-                                                                                                                < 400
-                                                                                                            ):
-                                                                                                                jsonData = res.json()
-                                                                                                                stopped = (
-                                                                                                                    jsonData[
-                                                                                                                        "status"
-                                                                                                                    ]
-                                                                                                                    == 5
+                                                                                                            url = f"{BASE_URL}api/v2/app/status"
+                                                                                                            stopped = False
+                                                                                                            while not stopped:
+                                                                                                                # res = requests.get(
+                                                                                                                #     url,
+                                                                                                                #     headers=headers,
+                                                                                                                # )
+                                                                                                                async with (
+                                                                                                                    session.get(
+                                                                                                                        url,
+                                                                                                                        headers=headers,
+                                                                                                                    ) as res
+                                                                                                                ):
+                                                                                                                    if (
+                                                                                                                        res.status
+                                                                                                                        < 400
+                                                                                                                    ):
+                                                                                                                        jsonData = await res.json()
+                                                                                                                        stopped = (
+                                                                                                                            jsonData[
+                                                                                                                                "status"
+                                                                                                                            ]
+                                                                                                                            == 5
+                                                                                                                        )
+                                                                                                                        print(
+                                                                                                                            f"{BASE_URL} is running"
+                                                                                                                        )
+                                                                                                                    else:
+                                                                                                                        print(
+                                                                                                                            f"Error: {res.status}"
+                                                                                                                        )
+                                                                                                                        stopped = True
+                                                                                                                await asyncio.sleep(
+                                                                                                                    1
                                                                                                                 )
-                                                                                                                print(
-                                                                                                                    f"{BASE_URL} is running"
-                                                                                                                )
-                                                                                                            else:
-                                                                                                                print(
-                                                                                                                    f"Error: {res.status_code}"
-                                                                                                                )
-                                                                                                                stopped = True
-                                                                                                            await asyncio.sleep(
-                                                                                                                1
+                                                                                                        else:
+                                                                                                            print(
+                                                                                                                f"{BASE_URL} restart failed"
                                                                                                             )
-                                                                                                    else:
-                                                                                                        print(
-                                                                                                            f"{BASE_URL} restart failed"
-                                                                                                        )
                                                                             else:
                                                                                 try:
                                                                                     await msg.delete()
@@ -1015,49 +1054,61 @@ def myStyle(log_queue):
                                                                                 "appId"
                                                                             ]
                                                                             url = f"https://share.streamlit.io/api/v2/apps/{appId}/restart"
-                                                                            res = requests.post(
-                                                                                url,
-                                                                                headers=headers,
-                                                                            )
-                                                                            if (
-                                                                                res.status_code
-                                                                                == 204
+                                                                            # res = requests.post(
+                                                                            #     url,
+                                                                            #     headers=headers,
+                                                                            # )
+                                                                            async with (
+                                                                                session.post(
+                                                                                    url,
+                                                                                    headers=headers,
+                                                                                ) as res
                                                                             ):
-                                                                                print(
-                                                                                    f"{BASE_URL} restarted"
-                                                                                )
-                                                                                stopped = False
-                                                                                while not stopped:
-                                                                                    res = requests.get(
-                                                                                        url,
-                                                                                        headers=headers,
+                                                                                if (
+                                                                                    res.status
+                                                                                    == 204
+                                                                                ):
+                                                                                    print(
+                                                                                        f"{BASE_URL} restarted"
                                                                                     )
-                                                                                    if (
-                                                                                        res.status_code
-                                                                                        < 400
-                                                                                    ):
-                                                                                        jsonData = res.json()
-                                                                                        stopped = (
-                                                                                            jsonData[
-                                                                                                "status"
-                                                                                            ]
-                                                                                            == 5
+                                                                                    stopped = False
+                                                                                    while not stopped:
+                                                                                        # res = requests.get(
+                                                                                        #     url,
+                                                                                        #     headers=headers,
+                                                                                        # )
+                                                                                        async with (
+                                                                                            session.get(
+                                                                                                url,
+                                                                                                headers=headers,
+                                                                                            ) as res
+                                                                                        ):
+                                                                                            if (
+                                                                                                res.status
+                                                                                                < 400
+                                                                                            ):
+                                                                                                jsonData = await res.json()
+                                                                                                stopped = (
+                                                                                                    jsonData[
+                                                                                                        "status"
+                                                                                                    ]
+                                                                                                    == 5
+                                                                                                )
+                                                                                                print(
+                                                                                                    f"{BASE_URL} is running"
+                                                                                                )
+                                                                                            else:
+                                                                                                print(
+                                                                                                    f"Error: {res.status}"
+                                                                                                )
+                                                                                                stopped = True
+                                                                                        await asyncio.sleep(
+                                                                                            1
                                                                                         )
-                                                                                        print(
-                                                                                            f"{BASE_URL} is running"
-                                                                                        )
-                                                                                    else:
-                                                                                        print(
-                                                                                            f"Error: {res.status_code}"
-                                                                                        )
-                                                                                        stopped = True
-                                                                                    await asyncio.sleep(
-                                                                                        1
+                                                                                else:
+                                                                                    print(
+                                                                                        f"{BASE_URL} restart failed"
                                                                                     )
-                                                                            else:
-                                                                                print(
-                                                                                    f"{BASE_URL} restart failed"
-                                                                                )
                                                             async with session.get(
                                                                 location
                                                                 + "api/v2/app/context",
