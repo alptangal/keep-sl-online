@@ -45,7 +45,6 @@ RESULT = None
 URL_STREAM = "https://keep-sl-online-d7bnwfpjbw9cw23yreygwk.streamlit.app/"
 RESTART_LOOP = random.randrange(12, 18, 1)
 NEXT_TIME = False
-timeout = 30
 
 
 def myStyle(log_queue):
@@ -726,6 +725,7 @@ def myStyle(log_queue):
                             async with session.get(
                                 BASE_URL, headers=headers, allow_redirects=False
                             ) as res:
+                                print(4445555)
                                 if res.status < 400:
                                     print(res.headers["location"], 11111)
                                     headers["cookie"] = ""
@@ -759,83 +759,254 @@ def myStyle(log_queue):
                                                         location = res.headers[
                                                             "location"
                                                         ]
-                                                        res = requests.get(
+                                                        async with session.get(
                                                             location,
                                                             headers=headers,
                                                             allow_redirects=False,
-                                                            timeout=timeout,
-                                                        )
-                                                        if res.status_code < 400:
-                                                            res = requests.get(
-                                                                location
-                                                                + "api/v2/app/context",
-                                                                headers=headers,
-                                                                allow_redirects=False,
-                                                                timeout=timeout,
-                                                            )
-                                                            if res.status_code < 400:
-                                                                res = requests.get(
-                                                                    BASE_URL
-                                                                    + "api/v2/app/disambiguate",
+                                                        ) as res:
+                                                            if res.status < 400:
+                                                                async with session.get(
+                                                                    location
+                                                                    + "api/v2/app/context",
                                                                     headers=headers,
-                                                                    timeout=timeout,
-                                                                )
-                                                                if (
-                                                                    res.status_code
-                                                                    < 400
-                                                                ):
-                                                                    headers[
-                                                                        "x-csrf-token"
-                                                                    ] = res.headers[
-                                                                        "x-csrf-token"
-                                                                    ]
-                                                                    url = (
-                                                                        BASE_URL
-                                                                        + "api/v2/app/status"
-                                                                    )
-                                                                    res = requests.get(
-                                                                        url,
-                                                                        headers=headers,
-                                                                        timeout=timeout,
-                                                                    )
-                                                                    js = res.json()
-                                                                    if (
-                                                                        js["status"]
-                                                                        != 5
-                                                                    ):
-                                                                        print(
-                                                                            BASE_URL,
-                                                                            "Resuming...",
-                                                                        )
-                                                                        url = (
-                                                                            BASE_URL
-                                                                            + "api/v2/app/resume"
-                                                                        )
-                                                                        res = requests.post(
-                                                                            url,
-                                                                            headers=headers,
-                                                                            timeout=timeout,
-                                                                        )
-                                                                        if (
-                                                                            res.status_code
-                                                                            < 400
+                                                                    allow_redirects=False,
+                                                                ) as res:
+                                                                    if res.status < 400:
+                                                                        async with (
+                                                                            session.get(
+                                                                                BASE_URL
+                                                                                + "api/v2/app/disambiguate",
+                                                                                headers=headers,
+                                                                            ) as res
                                                                         ):
-                                                                            stop = False
-                                                                            i = 0
-                                                                            while (
-                                                                                not stop
+                                                                            if (
+                                                                                res.status
+                                                                                < 400
                                                                             ):
-                                                                                res = requests.get(
+                                                                                headers[
+                                                                                    "x-csrf-token"
+                                                                                ] = res.headers[
+                                                                                    "x-csrf-token"
+                                                                                ]
+                                                                                url = (
+                                                                                    BASE_URL
+                                                                                    + "api/v2/app/status"
+                                                                                )
+                                                                                async with (
+                                                                                    session.get(
+                                                                                        url,
+                                                                                        headers=headers,
+                                                                                    ) as res
+                                                                                ):
+                                                                                    js = await res.json()
+                                                                                    if (
+                                                                                        js[
+                                                                                            "status"
+                                                                                        ]
+                                                                                        != 5
+                                                                                    ):
+                                                                                        print(
+                                                                                            BASE_URL,
+                                                                                            "Resuming...",
+                                                                                        )
+                                                                                        url = (
+                                                                                            BASE_URL
+                                                                                            + "api/v2/app/resume"
+                                                                                        )
+                                                                                        async with (
+                                                                                            session.post(
+                                                                                                url,
+                                                                                                headers=headers,
+                                                                                            ) as res
+                                                                                        ):
+                                                                                            if (
+                                                                                                res.status
+                                                                                                < 400
+                                                                                            ):
+                                                                                                stop = False
+                                                                                                i = 0
+                                                                                                while not stop:
+                                                                                                    async with (
+                                                                                                        session.get(
+                                                                                                            BASE_URL
+                                                                                                            + "api/v2/app/status",
+                                                                                                            headers=headers,
+                                                                                                        ) as res
+                                                                                                    ):
+                                                                                                        if (
+                                                                                                            res.status
+                                                                                                            < 400
+                                                                                                        ):
+                                                                                                            js = await res.json()
+                                                                                                            if (
+                                                                                                                js[
+                                                                                                                    "status"
+                                                                                                                ]
+                                                                                                                == 5
+                                                                                                            ):
+                                                                                                                stop = True
+                                                                                                    if (
+                                                                                                        i
+                                                                                                        == 20
+                                                                                                    ):
+                                                                                                        stop = True
+                                                                                                    await asyncio.sleep(
+                                                                                                        2
+                                                                                                    )
+                                                                                                    i += 1
+                                                                                    else:
+                                                                                        for author in authorizations:
+                                                                                            headers = {
+                                                                                                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0",
+                                                                                                "cookie": author[
+                                                                                                    "cookie"
+                                                                                                ],
+                                                                                                "x-csrf-token": author[
+                                                                                                    "csrf_token"
+                                                                                                ],
+                                                                                                "Accept": "*/*",
+                                                                                                "Accept-Encoding": "gzip, deflate, br, zstd",
+                                                                                                "Connection": "keep-alive",
+                                                                                            }
+                                                                                            url = f"{BASE_URL}api/v2/app/disambiguate"
+                                                                                            async with (
+                                                                                                session.get(
+                                                                                                    url,
+                                                                                                    headers=headers,
+                                                                                                ) as res
+                                                                                            ):
+                                                                                                if (
+                                                                                                    res.status
+                                                                                                    < 400
+                                                                                                ):
+                                                                                                    jsonData = await res.json()
+                                                                                                    appId = jsonData[
+                                                                                                        "appId"
+                                                                                                    ]
+                                                                                                    url = f"https://share.streamlit.io/api/v2/apps/{appId}/restart"
+                                                                                                    # res = requests.post(
+                                                                                                    #     url,
+                                                                                                    #     headers=headers,
+                                                                                                    # )
+                                                                                                    async with (
+                                                                                                        session.post(
+                                                                                                            url,
+                                                                                                            headers=headers,
+                                                                                                        ) as res
+                                                                                                    ):
+                                                                                                        if (
+                                                                                                            res.status
+                                                                                                            == 204
+                                                                                                        ):
+                                                                                                            print(
+                                                                                                                f"{BASE_URL} restarted"
+                                                                                                            )
+                                                                                                            url = f"{BASE_URL}api/v2/app/status"
+                                                                                                            stopped = False
+                                                                                                            while not stopped:
+                                                                                                                # res = requests.get(
+                                                                                                                #     url,
+                                                                                                                #     headers=headers,
+                                                                                                                # )
+                                                                                                                async with (
+                                                                                                                    session.get(
+                                                                                                                        url,
+                                                                                                                        headers=headers,
+                                                                                                                    ) as res
+                                                                                                                ):
+                                                                                                                    if (
+                                                                                                                        res.status
+                                                                                                                        < 400
+                                                                                                                    ):
+                                                                                                                        jsonData = await res.json()
+                                                                                                                        stopped = (
+                                                                                                                            jsonData[
+                                                                                                                                "status"
+                                                                                                                            ]
+                                                                                                                            == 5
+                                                                                                                        )
+                                                                                                                        print(
+                                                                                                                            f"{BASE_URL} is running"
+                                                                                                                        )
+                                                                                                                    else:
+                                                                                                                        print(
+                                                                                                                            f"Error: {res.status}"
+                                                                                                                        )
+                                                                                                                        stopped = True
+                                                                                                                await asyncio.sleep(
+                                                                                                                    1
+                                                                                                                )
+                                                                                                        else:
+                                                                                                            print(
+                                                                                                                f"{BASE_URL} restart failed"
+                                                                                                            )
+                                                                            else:
+                                                                                try:
+                                                                                    await msg.delete()
+                                                                                except Exception as error:
+                                                                                    print(
+                                                                                        error,
+                                                                                        3333,
+                                                                                    )
+                                                                                    pass
+                                    else:
+                                        location = BASE_URL
+                                        print(location, 33333, headers)
+                                        async with session.get(
+                                            location + "api/v2/app/context",
+                                            headers=headers,
+                                            allow_redirects=False,
+                                        ) as res:
+                                            if res.status < 400:
+                                                """cookies = session.cookie_jar.filter_cookies(location)
+                                                for key, cookie in cookies.items():
+                                                    headers['cookie'] += cookie.key +'='+cookie.value+';'
+                                                """
+                                                async with session.get(
+                                                    BASE_URL
+                                                    + "api/v2/app/disambiguate",
+                                                    headers=headers,
+                                                ) as res:
+                                                    if res.status < 400:
+                                                        headers["x-csrf-token"] = (
+                                                            res.headers["x-csrf-token"]
+                                                        )
+                                                        url = (
+                                                            BASE_URL
+                                                            + "api/v2/app/status"
+                                                        )
+                                                        async with session.get(
+                                                            url, headers=headers
+                                                        ) as res:
+                                                            js = await res.json()
+                                                            if js["status"] != 5:
+                                                                print(
+                                                                    BASE_URL,
+                                                                    "Resuming...",
+                                                                )
+                                                                url = (
+                                                                    BASE_URL
+                                                                    + "api/v2/app/resume"
+                                                                )
+                                                                async with session.post(
+                                                                    url, headers=headers
+                                                                ) as res:
+                                                                    if res.status < 400:
+                                                                        stop = False
+                                                                        i = 0
+                                                                        while not stop:
+                                                                            async with (
+                                                                                session.get(
                                                                                     BASE_URL
                                                                                     + "api/v2/app/status",
                                                                                     headers=headers,
-                                                                                    timeout=timeout,
-                                                                                )
+                                                                                ) as res
+                                                                            ):
                                                                                 if (
-                                                                                    res.status_code
+                                                                                    res.status
                                                                                     < 400
                                                                                 ):
-                                                                                    js = res.json()
+                                                                                    js = await res.json()
                                                                                     if (
                                                                                         js[
                                                                                             "status"
@@ -843,91 +1014,94 @@ def myStyle(log_queue):
                                                                                         == 5
                                                                                     ):
                                                                                         stop = True
-                                                                                if (
-                                                                                    i
-                                                                                    == 20
-                                                                                ):
-                                                                                    stop = True
-                                                                                await asyncio.sleep(
-                                                                                    2
+                                                                            if i == 20:
+                                                                                stop = (
+                                                                                    True
                                                                                 )
-                                                                                i += 1
-                                                                    else:
-                                                                        for author in authorizations:
-                                                                            headers = {
-                                                                                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0",
-                                                                                "cookie": author[
-                                                                                    "cookie"
-                                                                                ],
-                                                                                "x-csrf-token": author[
-                                                                                    "csrf_token"
-                                                                                ],
-                                                                                "Accept": "*/*",
-                                                                                "Accept-Encoding": "gzip, deflate, br, zstd",
-                                                                                "Connection": "keep-alive",
-                                                                            }
-                                                                            url = f"{BASE_URL}api/v2/app/disambiguate"
-                                                                            res = requests.get(
-                                                                                url,
-                                                                                headers=headers,
-                                                                                timeout=timeout,
+                                                                            await asyncio.sleep(
+                                                                                2
                                                                             )
-                                                                            if (
-                                                                                res.status_code
-                                                                                < 400
-                                                                            ):
-                                                                                jsonData = res.json()
-                                                                                appId = jsonData[
-                                                                                    "appId"
-                                                                                ]
-                                                                                url = f"https://share.streamlit.io/api/v2/apps/{appId}/restart"
-                                                                                # res = requests.post(
-                                                                                #     url,
-                                                                                #     headers=headers,
-                                                                                # )
-                                                                                res = requests.post(
+                                                                            i += 1
+                                                            else:
+                                                                for (
+                                                                    author
+                                                                ) in authorizations:
+                                                                    headers = {
+                                                                        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0",
+                                                                        "cookie": author[
+                                                                            "cookie"
+                                                                        ],
+                                                                        "x-csrf-token": author[
+                                                                            "csrf_token"
+                                                                        ],
+                                                                        "Accept": "*/*",
+                                                                        "Accept-Encoding": "gzip, deflate, br, zstd",
+                                                                        "Connection": "keep-alive",
+                                                                    }
+                                                                    url = f"{BASE_URL}api/v2/app/disambiguate"
+                                                                    async with (
+                                                                        session.get(
+                                                                            url,
+                                                                            headers=headers,
+                                                                        ) as res
+                                                                    ):
+                                                                        if (
+                                                                            res.status
+                                                                            < 400
+                                                                        ):
+                                                                            jsonData = await res.json()
+                                                                            appId = jsonData[
+                                                                                "appId"
+                                                                            ]
+                                                                            url = f"https://share.streamlit.io/api/v2/apps/{appId}/restart"
+                                                                            # res = requests.post(
+                                                                            #     url,
+                                                                            #     headers=headers,
+                                                                            # )
+                                                                            async with (
+                                                                                session.post(
                                                                                     url,
                                                                                     headers=headers,
-                                                                                    timeout=timeout,
-                                                                                )
+                                                                                ) as res
+                                                                            ):
                                                                                 if (
-                                                                                    res.status_code
+                                                                                    res.status
                                                                                     == 204
                                                                                 ):
                                                                                     print(
                                                                                         f"{BASE_URL} restarted"
                                                                                     )
-                                                                                    url = f"{BASE_URL}api/v2/app/status"
                                                                                     stopped = False
                                                                                     while not stopped:
                                                                                         # res = requests.get(
                                                                                         #     url,
                                                                                         #     headers=headers,
                                                                                         # )
-                                                                                        res = requests.get(
-                                                                                            url,
-                                                                                            headers=headers,
-                                                                                            timeout=timeout,
-                                                                                        )
-                                                                                        if (
-                                                                                            res.status_code
-                                                                                            < 400
+                                                                                        async with (
+                                                                                            session.get(
+                                                                                                url,
+                                                                                                headers=headers,
+                                                                                            ) as res
                                                                                         ):
-                                                                                            jsonData = res.json()
-                                                                                            stopped = (
-                                                                                                jsonData[
-                                                                                                    "status"
-                                                                                                ]
-                                                                                                == 5
-                                                                                            )
-                                                                                            print(
-                                                                                                f"{BASE_URL} is running"
-                                                                                            )
-                                                                                        else:
-                                                                                            print(
-                                                                                                f"Error: {res.status_code}"
-                                                                                            )
-                                                                                            stopped = True
+                                                                                            if (
+                                                                                                res.status
+                                                                                                < 400
+                                                                                            ):
+                                                                                                jsonData = await res.json()
+                                                                                                stopped = (
+                                                                                                    jsonData[
+                                                                                                        "status"
+                                                                                                    ]
+                                                                                                    == 5
+                                                                                                )
+                                                                                                print(
+                                                                                                    f"{BASE_URL} is running"
+                                                                                                )
+                                                                                            else:
+                                                                                                print(
+                                                                                                    f"Error: {res.status}"
+                                                                                                )
+                                                                                                stopped = True
                                                                                         await asyncio.sleep(
                                                                                             1
                                                                                         )
@@ -935,209 +1109,78 @@ def myStyle(log_queue):
                                                                                     print(
                                                                                         f"{BASE_URL} restart failed"
                                                                                     )
-                                                                else:
-                                                                    try:
-                                                                        await (
-                                                                            msg.delete()
-                                                                        )
-                                                                    except (
-                                                                        Exception
-                                                                    ) as error:
-                                                                        print(
-                                                                            error,
-                                                                            3333,
-                                                                        )
-                                                                        pass
-                                    else:
-                                        location = BASE_URL
-                                        print(location, 33333, headers)
-                                        res = requests.get(
-                                            location + "api/v2/app/context",
-                                            headers=headers,
-                                            allow_redirects=False,
-                                            timeout=timeout,
-                                        )
-                                        if res.status_code < 400:
-                                            """cookies = session.cookie_jar.filter_cookies(location)
-                                            for key, cookie in cookies.items():
-                                                headers['cookie'] += cookie.key +'='+cookie.value+';'
-                                            """
-                                            res = requests.get(
-                                                BASE_URL + "api/v2/app/disambiguate",
-                                                headers=headers,
-                                                timeout=timeout,
-                                            )
-                                            if res.status_code < 400:
-                                                headers["x-csrf-token"] = res.headers[
-                                                    "x-csrf-token"
-                                                ]
-                                                url = BASE_URL + "api/v2/app/status"
-                                                res = requests.get(
-                                                    url,
-                                                    headers=headers,
-                                                    timeout=timeout,
-                                                )
-                                                js = res.json()
-                                                if js["status"] != 5:
-                                                    print(
-                                                        BASE_URL,
-                                                        "Resuming...",
-                                                    )
-                                                    url = BASE_URL + "api/v2/app/resume"
-                                                    res = requests.post(
-                                                        url,
-                                                        headers=headers,
-                                                        timeout=timeout,
-                                                    )
-                                                    if res.status_code < 400:
-                                                        stop = False
-                                                        i = 0
-                                                        while not stop:
-                                                            res = requests.get(
-                                                                BASE_URL
-                                                                + "api/v2/app/status",
+                                                            async with session.get(
+                                                                location
+                                                                + "api/v2/app/context",
                                                                 headers=headers,
-                                                                timeout=timeout,
-                                                            )
-                                                            if res.status_code < 400:
-                                                                js = res.json()
-                                                                if js["status"] == 5:
-                                                                    stop = True
-                                                            if i == 20:
-                                                                stop = True
-                                                            await asyncio.sleep(2)
-                                                            i += 1
-                                                else:
-                                                    for author in authorizations:
-                                                        headers = {
-                                                            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:147.0) Gecko/20100101 Firefox/147.0",
-                                                            "cookie": author["cookie"],
-                                                            "x-csrf-token": author[
-                                                                "csrf_token"
-                                                            ],
-                                                            "Accept": "*/*",
-                                                            "Accept-Encoding": "gzip, deflate, br, zstd",
-                                                            "Connection": "keep-alive",
-                                                        }
-                                                        url = f"{BASE_URL}api/v2/app/disambiguate"
-                                                        res = requests.get(
-                                                            url,
-                                                            headers=headers,
-                                                            timeout=timeout,
-                                                        )
-                                                        if res.status_code < 400:
-                                                            jsonData = res.json()
-                                                            appId = jsonData["appId"]
-                                                            url = f"https://share.streamlit.io/api/v2/apps/{appId}/restart"
-                                                            # res = requests.post(
-                                                            #     url,
-                                                            #     headers=headers,
-                                                            # )
-                                                            res = requests.post(
-                                                                url,
-                                                                headers=headers,
-                                                            )
-                                                            if res.status_code == 204:
-                                                                print(
-                                                                    f"{BASE_URL} restarted"
-                                                                )
-                                                                stopped = False
-                                                                while not stopped:
-                                                                    # res = requests.get(
-                                                                    #     url,
-                                                                    #     headers=headers,
-                                                                    # )
-                                                                    res = requests.get(
-                                                                        url,
-                                                                        headers=headers,
-                                                                        timeout=timeout,
+                                                                allow_redirects=False,
+                                                            ) as res:
+                                                                if res.status < 400:
+                                                                    cookies = session.cookie_jar.filter_cookies(
+                                                                        location
                                                                     )
-                                                                    if (
-                                                                        res.status_code
-                                                                        < 400
+                                                                    for (
+                                                                        key,
+                                                                        cookie,
+                                                                    ) in (
+                                                                        cookies.items()
                                                                     ):
-                                                                        jsonData = (
-                                                                            res.json()
+                                                                        headers[
+                                                                            "cookie"
+                                                                        ] += (
+                                                                            cookie.key
+                                                                            + "="
+                                                                            + cookie.value
+                                                                            + ";"
                                                                         )
-                                                                        stopped = (
-                                                                            jsonData[
-                                                                                "status"
+                                                                    async with (
+                                                                        session.get(
+                                                                            BASE_URL
+                                                                            + "api/v2/app/disambiguate",
+                                                                            headers=headers,
+                                                                        ) as res
+                                                                    ):
+                                                                        if (
+                                                                            res.status
+                                                                            < 400
+                                                                        ):
+                                                                            headers[
+                                                                                "x-csrf-token"
+                                                                            ] = res.headers[
+                                                                                "x-csrf-token"
                                                                             ]
-                                                                            == 5
-                                                                        )
-                                                                        print(
-                                                                            f"{BASE_URL} is running"
-                                                                        )
-                                                                    else:
-                                                                        print(
-                                                                            f"Error: {res.status_code}"
-                                                                        )
-                                                                        stopped = True
-                                                                    await asyncio.sleep(
-                                                                        1
-                                                                    )
-                                                            else:
-                                                                print(
-                                                                    f"{BASE_URL} restart failed"
-                                                                )
-                                                res = requests.get(
-                                                    location + "api/v2/app/context",
-                                                    headers=headers,
-                                                    allow_redirects=False,
-                                                    timeout=timeout,
-                                                )
-                                                if res.status_code < 400:
-                                                    cookies = session.cookie_jar.filter_cookies(
-                                                        location
-                                                    )
-                                                    for (
-                                                        key,
-                                                        cookie,
-                                                    ) in cookies.items():
-                                                        headers["cookie"] += (
-                                                            cookie.key
-                                                            + "="
-                                                            + cookie.value
-                                                            + ";"
-                                                        )
-                                                        res = requests.get(
-                                                            BASE_URL
-                                                            + "api/v2/app/disambiguate",
-                                                            headers=headers,
-                                                            timeout=timeout,
-                                                        )
-                                                        if res.status_code < 400:
-                                                            headers["x-csrf-token"] = (
-                                                                res.headers[
-                                                                    "x-csrf-token"
-                                                                ]
-                                                            )
-                                                            url = (
-                                                                BASE_URL
-                                                                + "api/v1/app/event/open"
-                                                            )
-                                                            res = requests.post(
-                                                                url,
-                                                                headers=headers,
-                                                                timeout=timeout,
-                                                            )
-                                                            url = (
-                                                                BASE_URL
-                                                                + "api/v2/app/status"
-                                                            )
-                                                            res = requests.get(
-                                                                url,
-                                                                headers=headers,
-                                                                timeout=timeout,
-                                                            )
-                                                            print(res.status_code)
-                                                            await asyncio.sleep(60)
-                                            else:
-                                                try:
-                                                    await msg.delete()
-                                                except Exception as error:
-                                                    print(error, 3333)
-                                                    pass
+                                                                            url = (
+                                                                                BASE_URL
+                                                                                + "api/v1/app/event/open"
+                                                                            )
+                                                                            async with (
+                                                                                session.post(
+                                                                                    url,
+                                                                                    headers=headers,
+                                                                                ) as res
+                                                                            ):
+                                                                                url = (
+                                                                                    BASE_URL
+                                                                                    + "api/v2/app/status"
+                                                                                )
+                                                                                async with (
+                                                                                    session.get(
+                                                                                        url,
+                                                                                        headers=headers,
+                                                                                    ) as res
+                                                                                ):
+                                                                                    print(
+                                                                                        res.status
+                                                                                    )
+                                                                                    await asyncio.sleep(
+                                                                                        60
+                                                                                    )
+                                                    else:
+                                                        try:
+                                                            await msg.delete()
+                                                        except Exception as error:
+                                                            print(error, 3333)
+                                                            pass
                         break
 
         except Exception as error:
