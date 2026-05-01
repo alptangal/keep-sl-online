@@ -1380,13 +1380,18 @@ def myStyle(log_queue):
                                                                     encoded
                                                                 )
                                                                 print("sent")
-                                                                for i in range(
-                                                                    5
-                                                                ):  # nhận tối đa 5 message
-                                                                    message = await websocket.recv()
-                                                                    print(
-                                                                        f"📥 Nhận được message thứ {i + 1} | Kích thước: {len(message)} bytes"
-                                                                    )
+                                                                try:
+                                                                    for i in range(
+                                                                        5
+                                                                    ):  # nhận tối đa 5 message
+                                                                        message = await websocket.recv()
+                                                                        print(
+                                                                            f"📥 Nhận được message thứ {i + 1} | Kích thước: {len(message)} bytes"
+                                                                        )
+                                                                except (
+                                                                    Exception
+                                                                ) as error:
+                                                                    print(error)
                                                             print(f"{BASE_URL} pong")
                                                             break
                                                         except Exception as error:
