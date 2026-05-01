@@ -1,4 +1,5 @@
 import asyncio
+import binascii
 import json
 import locale
 import os
@@ -15,9 +16,13 @@ import aiohttp
 import discord
 import requests
 import streamlit as st
+import websockets
 from discord.ext import commands, tasks
 from discord.utils import get
 from dotenv import load_dotenv
+from google.protobuf.internal.encoder import _VarintBytes
+from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
+from websockets.sync.client import connect
 from yarl import URL
 
 import server
@@ -46,6 +51,167 @@ URL_STREAM = "https://keep-sl-online-d7bnwfpjbw9cw23yreygwk.streamlit.app/"
 RESTART_LOOP = random.randrange(12, 18, 1)
 NEXT_TIME = False
 timeout = 30
+
+data = {
+    "timezone": "Asia/Bangkok",
+    "timezone_offset": -420,
+    "locale": "en-US",
+    "url": "https://bot-bm-ghfzbuypvbrku5jbtobuks.streamlit.app/",
+    "is_embedded": False,
+    "color_scheme": "dark",
+}
+
+
+import struct
+
+
+def encode_varint(value):
+    """Mã hóa số nguyên thành Protobuf Varint (64-bit cho số âm)."""
+    if value < 0:
+        # Protobuf mã hóa số âm bằng 10 bytes (int64)
+        value += 1 << 64
+    res = bytearray()
+    while True:
+        bits = value & 0x7F
+        value >>= 7
+        if value:
+            res.append(0x80 | bits)
+        else:
+            res.append(bits)
+            break
+    return bytes(res)
+
+
+def encode_tag(field_number, wire_type):
+    return encode_varint((field_number << 3) | wire_type)
+
+
+def encode_string(field_number, s):
+    """Mã hóa String, kể cả khi rỗng (length 0)."""
+    data = s.encode("utf-8")
+    return encode_tag(field_number, 2) + encode_varint(len(data)) + data
+
+
+def encode_to_hex_standalone(url):
+    # 1. Encode ContextInfo (Nằm trong RerunData)
+    ctx_parts = [
+        encode_string(1, "Asia/Bangkok"),
+        encode_tag(2, 0) + encode_varint(-420),
+        encode_string(3, "en-US"),
+        encode_string(4, url),
+        encode_tag(5, 0) + encode_varint(0),  # isEmbedded: False
+        encode_string(6, "dark"),
+    ]
+    ctx_bin = b"".join(ctx_parts)
+
+    # 2. Encode RerunData (Nằm trong ForwardMsg)
+    # Để khớp với mẫu, ta PHẢI bao gồm các trường rỗng theo đúng thứ tự
+    rerun_parts = [
+        encode_string(1, ""),  # queryString
+        # Trường số 2 (widgetStates) thường bỏ qua nếu rỗng trong hex mẫu của bạn
+        # hoặc mã hóa dưới dạng bytes rỗng. Ở đây ta thấy 1200 (field 2, length 0).
+        encode_tag(2, 2) + b"\x00",
+        encode_string(3, ""),  # pageScriptHash
+        encode_string(4, ""),  # pageName
+        encode_tag(8, 2) + encode_varint(len(ctx_bin)) + ctx_bin,  # contextInfo
+    ]
+    rerun_bin = b"".join(rerun_parts)
+
+    # 3. Encode ForwardMsg (Root)
+    # Field 11 (rerunData) -> Tag = (11 << 3) | 2 = 90 (Hex: 5a)
+    final_bin = encode_tag(11, 2) + encode_varint(len(rerun_bin)) + rerun_bin
+
+    return final_bin.hex()
+
+
+def encode_context_info(ctx: dict) -> bytes:
+    parts = []
+
+    # 1. timezone (string)
+    if timezone := ctx.get("timezone"):
+        value = timezone.encode("utf-8")
+        parts.append(_VarintBytes(1 << 3 | 2) + _VarintBytes(len(value)) + value)
+
+    # 2. timezoneOffset (int32)
+    if "timezoneOffset" in ctx:
+        offset = ctx["timezoneOffset"]
+        parts.append(
+            _VarintBytes(2 << 3 | 0)
+            + _VarintBytes(offset if offset >= 0 else (1 << 32) + offset)
+        )
+
+    # 3. locale (string)
+    if locale := ctx.get("locale"):
+        value = locale.encode("utf-8")
+        parts.append(_VarintBytes(3 << 3 | 2) + _VarintBytes(len(value)) + value)
+
+    # 4. url (string)
+    if url := ctx.get("url"):
+        value = url.encode("utf-8")
+        parts.append(_VarintBytes(4 << 3 | 2) + _VarintBytes(len(value)) + value)
+
+    # 5. isEmbedded (bool)
+    if "isEmbedded" in ctx:
+        val = b"\x01" if ctx["isEmbedded"] else b"\x00"
+        parts.append(_VarintBytes(5 << 3 | 0) + val)
+
+    # 6. colorScheme (string)
+    if color := ctx.get("colorScheme"):
+        value = color.encode("utf-8")
+        parts.append(_VarintBytes(6 << 3 | 2) + _VarintBytes(len(value)) + value)
+
+    return b"".join(parts)
+
+
+def create_and_encode_backmsg(e: dict, return_hex: bool = True):
+    """
+    Tạo BackMsg và encode thành bytes.
+    Trả về cả bytes và hex để dễ debug.
+    """
+    parts = []
+
+    if rerun := e.get("rerunScript"):
+        rerun_parts = []
+
+        # 1. queryString (field 1)
+        qs = rerun.get("queryString", "").encode("utf-8")
+        rerun_parts.append(_VarintBytes(1 << 3 | 2) + _VarintBytes(len(qs)) + qs)
+
+        # 2. widgetStates (field 2) - rỗng
+        rerun_parts.append(_VarintBytes(2 << 3 | 2) + _VarintBytes(0))
+
+        # 3. pageScriptHash (field 3)
+        psh = rerun.get("pageScriptHash", "").encode("utf-8")
+        rerun_parts.append(_VarintBytes(3 << 3 | 2) + _VarintBytes(len(psh)) + psh)
+
+        # 4. pageName (field 4)
+        pn = rerun.get("pageName", "").encode("utf-8")
+        rerun_parts.append(_VarintBytes(4 << 3 | 2) + _VarintBytes(len(pn)) + pn)
+
+        # 5. contextInfo (field 5)
+        if context := rerun.get("contextInfo"):
+            ctx_bytes = encode_context_info(context)
+            rerun_parts.append(
+                _VarintBytes(5 << 3 | 2) + _VarintBytes(len(ctx_bytes)) + ctx_bytes
+            )
+
+        rerun_msg = b"".join(rerun_parts)
+
+        # rerunScript nằm ở field 90 của BackMsg
+        parts.append(
+            _VarintBytes(90 << 3 | 2) + _VarintBytes(len(rerun_msg)) + rerun_msg
+        )
+
+    final_bytes = b"".join(parts)
+
+    # Trả về kết quả
+    if return_hex:
+        hex_str = final_bytes.hex()
+        print(f"Độ dài: {len(final_bytes)} bytes")
+        print(f"Hex: {hex_str}")
+        return final_bytes, hex_str
+    else:
+        return final_bytes
 
 
 def myStyle(log_queue):
@@ -589,9 +755,26 @@ def myStyle(log_queue):
     async def keepLive(guild):
         global RESULT
         location = None
+        e = {
+            "rerunScript": {
+                "queryString": "",
+                "widgetStates": {},
+                "pageScriptHash": "",
+                "pageName": "",
+                "contextInfo": {
+                    "timezone": "Asia/Bangkok",
+                    "timezoneOffset": -420,
+                    "locale": "en-US",
+                    "url": "https://bot-bm-ghfzbuypvbrku5jbtobuks.streamlit.app/",
+                    "isEmbedded": False,
+                    "colorScheme": "dark",
+                },
+            }
+        }
         try:
             async for msg in RESULT["rawCh"].history():
                 BASE_URL = msg.content.strip().split(" || ")[0]
+                encoded = encode_to_hex_standalone(BASE_URL)
                 print(BASE_URL + " processing")
                 isPaused = False
                 headers = {
@@ -1139,6 +1322,77 @@ def myStyle(log_queue):
                                                     print(error, 3333)
                                                     pass
                         break
+                    else:
+                        async with aiohttp.ClientSession(
+                            cookie_jar=aiohttp.CookieJar()
+                        ) as session:
+                            async with session.get(
+                                BASE_URL, headers=headers, allow_redirects=True
+                            ) as res:
+                                if res.status < 400:
+                                    res = requests.get(
+                                        f"{BASE_URL}api/v2/app/disambiguate"
+                                    )
+                                    headers = {
+                                        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:152.0) Gecko/20100101 Firefox/152.0",
+                                        "content-type": "application/json",
+                                        "cookie": f"{res.headers['set-cookie']}",
+                                        "x-csrf-token": f"{res.headers['x-csrf-token']}",
+                                        "Origin": BASE_URL,
+                                    }
+                                    if res.status_code < 400:
+                                        res = requests.get(
+                                            f"{BASE_URL}api/v2/app/disambiguate"
+                                        )
+                                        if res.status_code < 400:
+                                            res = requests.get(
+                                                f"{BASE_URL}api/v2/app/context"
+                                            )
+                                            if res.status_code < 400:
+                                                res = requests.post(
+                                                    f"{BASE_URL}api/v1/app/event/open",
+                                                    headers=headers,
+                                                    json={},
+                                                )
+                                                if res.status_code < 400:
+                                                    res = requests.post(
+                                                        f"{BASE_URL}api/v1/app/event/focus",
+                                                        headers=headers,
+                                                        json={
+                                                            "sessionId": "730817f1-b4ff-4bb1-9e74-6021e64e67ca",
+                                                            "createdAt": "2026-04-29T16:15:20.168Z",
+                                                        },
+                                                    )
+                                                    res = requests.get(
+                                                        f"{BASE_URL}~/+/_stcore/health",
+                                                        headers=headers,
+                                                        allow_redirects=True,
+                                                    )
+                                                    if res.status_code < 400:
+                                                        try:
+                                                            async with (
+                                                                websockets.connect(
+                                                                    f"wss://{BASE_URL[8:]}~/+/_stcore/stream",
+                                                                    origin=BASE_URL,
+                                                                ) as websocket
+                                                            ):
+                                                                print(encoded)
+                                                                await websocket.send(
+                                                                    encoded
+                                                                )
+                                                                print("sent")
+                                                                for i in range(
+                                                                    5
+                                                                ):  # nhận tối đa 5 message
+                                                                    message = await websocket.recv()
+                                                                    print(
+                                                                        f"📥 Nhận được message thứ {i + 1} | Kích thước: {len(message)} bytes"
+                                                                    )
+                                                            print(f"{BASE_URL} pong")
+                                                            break
+                                                        except Exception as error:
+                                                            print(error)
+                                                            break
 
         except Exception as error:
             RESULT = await getBasic(guild)

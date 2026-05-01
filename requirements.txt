@@ -8,3 +8,5 @@ flask
 g4f
 nest-asyncio
 python-dotenv
+streamlit
+protobuf
