@@ -22,7 +22,6 @@ from discord.utils import get
 from dotenv import load_dotenv
 from google.protobuf.internal.encoder import _VarintBytes
 from streamlit.proto.ForwardMsg_pb2 import ForwardMsg
-from websockets.sync.client import connect
 from yarl import URL
 
 import server
