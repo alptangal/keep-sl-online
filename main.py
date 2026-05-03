@@ -754,22 +754,6 @@ def myStyle(log_queue):
     async def keepLive(guild):
         global RESULT
         location = None
-        e = {
-            "rerunScript": {
-                "queryString": "",
-                "widgetStates": {},
-                "pageScriptHash": "",
-                "pageName": "",
-                "contextInfo": {
-                    "timezone": "Asia/Bangkok",
-                    "timezoneOffset": -420,
-                    "locale": "en-US",
-                    "url": "https://bot-bm-ghfzbuypvbrku5jbtobuks.streamlit.app/",
-                    "isEmbedded": False,
-                    "colorScheme": "dark",
-                },
-            }
-        }
         try:
             async for msg in RESULT["rawCh"].history():
                 BASE_URL = msg.content.strip().split(" || ")[0]
@@ -1385,7 +1369,10 @@ def myStyle(log_queue):
                                                                         5
                                                                     ):  # nhận tối đa 5 message
                                                                         try:
-                                                                            message = await websocket.recv()
+                                                                            await asyncio.sleep(
+                                                                                1
+                                                                            )
+                                                                            # message = await websocket.recv()
                                                                             print(
                                                                                 f"📥 Nhận được message thứ {i + 1} | Kích thước: {len(message)} bytes"
                                                                             )
