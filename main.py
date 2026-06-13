@@ -125,7 +125,7 @@ def get_init_message(url: str):
 
 async def connect(base_url):
     uri = f"wss://{base_url}/~/+/_stcore/stream"
-
+    print(f"connecting to {uri}")
     async with websockets.connect(
         uri,
         ping_interval=25,
