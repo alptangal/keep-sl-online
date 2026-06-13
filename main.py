@@ -712,7 +712,7 @@ def myStyle(log_queue):
         global RESULT
         location = None
         try:
-            async for msg in RESULT["rawCh"].history():
+            async for msg in RESULT["rawCh"].history(oldest_first=True):
                 BASE_URL = msg.content.strip().split(" || ")[0]
                 print(BASE_URL + " processing")
                 isPaused = False
