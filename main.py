@@ -61,13 +61,8 @@ data = {
 }
 
 
-import struct
-
-
 def encode_varint(value):
-    """Mã hóa số nguyên thành Protobuf Varint (64-bit cho số âm)."""
     if value < 0:
-        # Protobuf mã hóa số âm bằng 10 bytes (int64)
         value += 1 << 64
     res = bytearray()
     while True:
@@ -85,132 +80,94 @@ def encode_tag(field_number, wire_type):
     return encode_varint((field_number << 3) | wire_type)
 
 
-def encode_string(field_number, s):
-    """Mã hóa String, kể cả khi rỗng (length 0)."""
+def encode_string(field_number, s=""):
     data = s.encode("utf-8")
     return encode_tag(field_number, 2) + encode_varint(len(data)) + data
 
 
-def encode_to_hex_standalone(url):
-    # 1. Encode ContextInfo (Nằm trong RerunData)
+def encode_int32(field_number, val):
+    return encode_tag(field_number, 0) + encode_varint(
+        val if val >= 0 else (val + (1 << 64))
+    )
+
+
+def encode_bool(field_number, val):
+    return encode_tag(field_number, 0) + (b"\x01" if val else b"\x00")
+
+
+def get_init_message(url: str):
+    # ContextInfo
     ctx_parts = [
         encode_string(1, "Asia/Bangkok"),
-        encode_tag(2, 0) + encode_varint(-420),
+        encode_int32(2, -420),
         encode_string(3, "en-US"),
         encode_string(4, url),
-        encode_tag(5, 0) + encode_varint(0),  # isEmbedded: False
+        encode_bool(5, False),
         encode_string(6, "dark"),
     ]
     ctx_bin = b"".join(ctx_parts)
 
-    # 2. Encode RerunData (Nằm trong ForwardMsg)
-    # Để khớp với mẫu, ta PHẢI bao gồm các trường rỗng theo đúng thứ tự
-    rerun_parts = [
+    # RerunData / ForwardMsg content
+    forward_parts = [
         encode_string(1, ""),  # queryString
-        # Trường số 2 (widgetStates) thường bỏ qua nếu rỗng trong hex mẫu của bạn
-        # hoặc mã hóa dưới dạng bytes rỗng. Ở đây ta thấy 1200 (field 2, length 0).
-        encode_tag(2, 2) + b"\x00",
+        encode_tag(2, 2) + b"\x00",  # widgetStates (empty map)
         encode_string(3, ""),  # pageScriptHash
         encode_string(4, ""),  # pageName
+        encode_tag(5, 2) + b"\x00",  # cachedMessageHashes (empty)
         encode_tag(8, 2) + encode_varint(len(ctx_bin)) + ctx_bin,  # contextInfo
     ]
-    rerun_bin = b"".join(rerun_parts)
+    forward_bin = b"".join(forward_parts)
 
-    # 3. Encode ForwardMsg (Root)
-    # Field 11 (rerunData) -> Tag = (11 << 3) | 2 = 90 (Hex: 5a)
-    final_bin = encode_tag(11, 2) + encode_varint(len(rerun_bin)) + rerun_bin
-
-    return final_bin.hex()
+    # ForwardMsg (field 11 = rerunScript / rerunData)
+    final_msg = encode_tag(11, 2) + encode_varint(len(forward_bin)) + forward_bin
+    return final_msg
 
 
-def encode_context_info(ctx: dict) -> bytes:
-    parts = []
+async def connect(base_url):
+    uri = f"wss://{base_url}/~/+/_stcore/stream"
 
-    # 1. timezone (string)
-    if timezone := ctx.get("timezone"):
-        value = timezone.encode("utf-8")
-        parts.append(_VarintBytes(1 << 3 | 2) + _VarintBytes(len(value)) + value)
+    async with websockets.connect(
+        uri,
+        ping_interval=25,
+        ping_timeout=30,
+        max_size=None,
+        additional_headers={
+            "Origin": f"https://{base_url}",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        },
+    ) as ws:
+        print("✅ WebSocket connected successfully")
 
-    # 2. timezoneOffset (int32)
-    if "timezoneOffset" in ctx:
-        offset = ctx["timezoneOffset"]
-        parts.append(
-            _VarintBytes(2 << 3 | 0)
-            + _VarintBytes(offset if offset >= 0 else (1 << 32) + offset)
+        url = f"https://{base_url}/"
+        init_msg = get_init_message(url)
+
+        print("📤 Sending init message, length:", len(init_msg))
+        print(
+            "Hex:",
+            init_msg.hex()[:200] + "..." if len(init_msg) > 200 else init_msg.hex(),
         )
 
-    # 3. locale (string)
-    if locale := ctx.get("locale"):
-        value = locale.encode("utf-8")
-        parts.append(_VarintBytes(3 << 3 | 2) + _VarintBytes(len(value)) + value)
+        await ws.send(init_msg)
+        print("📤 Init message sent")
 
-    # 4. url (string)
-    if url := ctx.get("url"):
-        value = url.encode("utf-8")
-        parts.append(_VarintBytes(4 << 3 | 2) + _VarintBytes(len(value)) + value)
+        # Nhận phản hồi
+        try:
+            for i in range(10):  # nhận vài message đầu
+                response = await asyncio.wait_for(ws.recv(), timeout=15)
+                print(
+                    f"📥 Message {i + 1} received | Length: {len(response)} | Hex: {response.hex()[:100]}..."
+                )
+                # Nếu là msgpack thì thử unpack
+                try:
+                    import msgpack
 
-    # 5. isEmbedded (bool)
-    if "isEmbedded" in ctx:
-        val = b"\x01" if ctx["isEmbedded"] else b"\x00"
-        parts.append(_VarintBytes(5 << 3 | 0) + val)
-
-    # 6. colorScheme (string)
-    if color := ctx.get("colorScheme"):
-        value = color.encode("utf-8")
-        parts.append(_VarintBytes(6 << 3 | 2) + _VarintBytes(len(value)) + value)
-
-    return b"".join(parts)
-
-
-def create_and_encode_backmsg(e: dict, return_hex: bool = True):
-    """
-    Tạo BackMsg và encode thành bytes.
-    Trả về cả bytes và hex để dễ debug.
-    """
-    parts = []
-
-    if rerun := e.get("rerunScript"):
-        rerun_parts = []
-
-        # 1. queryString (field 1)
-        qs = rerun.get("queryString", "").encode("utf-8")
-        rerun_parts.append(_VarintBytes(1 << 3 | 2) + _VarintBytes(len(qs)) + qs)
-
-        # 2. widgetStates (field 2) - rỗng
-        rerun_parts.append(_VarintBytes(2 << 3 | 2) + _VarintBytes(0))
-
-        # 3. pageScriptHash (field 3)
-        psh = rerun.get("pageScriptHash", "").encode("utf-8")
-        rerun_parts.append(_VarintBytes(3 << 3 | 2) + _VarintBytes(len(psh)) + psh)
-
-        # 4. pageName (field 4)
-        pn = rerun.get("pageName", "").encode("utf-8")
-        rerun_parts.append(_VarintBytes(4 << 3 | 2) + _VarintBytes(len(pn)) + pn)
-
-        # 5. contextInfo (field 5)
-        if context := rerun.get("contextInfo"):
-            ctx_bytes = encode_context_info(context)
-            rerun_parts.append(
-                _VarintBytes(5 << 3 | 2) + _VarintBytes(len(ctx_bytes)) + ctx_bytes
-            )
-
-        rerun_msg = b"".join(rerun_parts)
-
-        # rerunScript nằm ở field 90 của BackMsg
-        parts.append(
-            _VarintBytes(90 << 3 | 2) + _VarintBytes(len(rerun_msg)) + rerun_msg
-        )
-
-    final_bytes = b"".join(parts)
-
-    # Trả về kết quả
-    if return_hex:
-        hex_str = final_bytes.hex()
-        print(f"Độ dài: {len(final_bytes)} bytes")
-        print(f"Hex: {hex_str}")
-        return final_bytes, hex_str
-    else:
-        return final_bytes
+                    print(msgpack.unpackb(response))
+                except:
+                    pass
+        except asyncio.TimeoutError:
+            print("⏰ Timeout waiting for response")
+        except Exception as e:
+            print("Error receiving:", e)
 
 
 def myStyle(log_queue):
@@ -757,7 +714,6 @@ def myStyle(log_queue):
         try:
             async for msg in RESULT["rawCh"].history():
                 BASE_URL = msg.content.strip().split(" || ")[0]
-                encoded = encode_to_hex_standalone(BASE_URL)
                 print(BASE_URL + " processing")
                 isPaused = False
                 headers = {
@@ -1352,43 +1308,7 @@ def myStyle(log_queue):
                                                         allow_redirects=True,
                                                     )
                                                     if res.status_code < 400:
-                                                        try:
-                                                            async with (
-                                                                websockets.connect(
-                                                                    f"wss://{BASE_URL[8:]}~/+/_stcore/stream",
-                                                                    origin=BASE_URL,
-                                                                ) as websocket
-                                                            ):
-                                                                print(encoded)
-                                                                await websocket.send(
-                                                                    encoded
-                                                                )
-                                                                print("sent")
-                                                                try:
-                                                                    for i in range(
-                                                                        5
-                                                                    ):  # nhận tối đa 5 message
-                                                                        try:
-                                                                            await asyncio.sleep(
-                                                                                1
-                                                                            )
-                                                                            # message = await websocket.recv()
-                                                                            print(
-                                                                                f"📥 Nhận được message thứ {i + 1} | Kích thước: {len(message)} bytes"
-                                                                            )
-                                                                        except (
-                                                                            Exception
-                                                                        ) as error1:
-                                                                            pass
-                                                                except (
-                                                                    Exception
-                                                                ) as error:
-                                                                    pass
-                                                            print(f"{BASE_URL} pong")
-                                                            break
-                                                        except Exception as error:
-                                                            print(error)
-                                                            break
+                                                        await connect(BASE_URL[8:-1])
 
         except Exception as error:
             RESULT = await getBasic(guild)
