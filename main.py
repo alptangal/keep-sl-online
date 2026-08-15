@@ -451,6 +451,7 @@ def myStyle(log_queue):
                                     "info",
                                     f"{base_url} ping -> {res.status}",
                                 )
+                                await connect(base_url)
                         except Exception as e:
                             _emit(log_queue, "error", f"{base_url} ping error: {e}")
         except Exception as e:
