@@ -394,18 +394,24 @@ def myStyle(log_queue):
         headers = {"user-agent": DEFAULT_UA}
         timeout_cfg = aiohttp.ClientTimeout(total=timeout)
         try:
-            async with aiohttp.ClientSession(
-                cookie_jar=aiohttp.CookieJar(), timeout=timeout_cfg
-            ) as session:
-                async for msg in RESULT["rawCh"].history():
-                    parts = msg.content.strip().split(" || ")
-                    base_url = parts[0]
-                    member_id = (
-                        int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else None
-                    )
-
-                    is_paused = False
-                    try:
+            async for msg in RESULT["rawCh"].history(oldest_first=True):
+                BASE_URL = msg.content.strip().split(" || ")[0]
+                print(BASE_URL + " processing")
+                isPaused = False
+                headers = {
+                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0"
+                }
+                async with aiohttp.ClientSession(
+                    cookie_jar=aiohttp.CookieJar()
+                ) as session:
+                    async with session.get(
+                        BASE_URL + "api/v2/app/status", headers=headers
+                    ) as res:
+                        if res.status < 400:
+                            js = await res.json()
+                            if js["status"] != 5:
+                                isPaused = True
+                    if not isPaused:
                         async with session.get(
                             base_url + "api/v2/app/status", headers=headers
                         ) as res:
