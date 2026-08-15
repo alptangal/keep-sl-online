@@ -192,10 +192,15 @@ async def wake_streamlit_app(
         return False
 
     try:
+        session.cookie_jar.clear()
         async with session.get(
             base_url + "api/v2/app/context", headers=headers, allow_redirects=False
         ) as res:
             if res.status >= 400:
+                body = await res.text()
+                jar_cookies = {c.key: c.value for c in session.cookie_jar}
+                print(f"[debug] cookie jar: {jar_cookies}")
+                print(f"[debug] {base_url} context {res.status} body: {body[:500]}")
                 _emit(log_queue, "error", f"{base_url} context failed: {res.status}")
                 return False
     except Exception as e:
@@ -412,6 +417,7 @@ def myStyle(log_queue):
                             if res.status < 400:
                                 js = await res.json()
                                 is_paused = js.get("status") != 5
+
                     except Exception as e:
                         _emit(log_queue, "error", f"{base_url} status check error: {e}")
 
@@ -421,7 +427,6 @@ def myStyle(log_queue):
                         member_offline = (
                             member is not None and str(member.status) == "offline"
                         )
-
                     if is_paused or member_offline:
                         ok = await wake_streamlit_app(
                             session, base_url, dict(headers), authorizations, log_queue
@@ -435,12 +440,6 @@ def myStyle(log_queue):
                                     "error",
                                     f"{base_url} connect() failed: {e}",
                                 )
-                        #
-                        # else:
-                        #     # try:
-                        #     #     # await msg.delete()
-                        #     # except Exception:
-                        #     #     pass
                     else:
                         # App already awake and member online - lightweight keep-alive ping only.
                         try:
