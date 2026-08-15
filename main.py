@@ -435,11 +435,12 @@ def myStyle(log_queue):
                                     "error",
                                     f"{base_url} connect() failed: {e}",
                                 )
-                        else:
-                            try:
-                                await msg.delete()
-                            except Exception:
-                                pass
+                        #
+                        # else:
+                        #     # try:
+                        #     #     # await msg.delete()
+                        #     # except Exception:
+                        #     #     pass
                     else:
                         # App already awake and member online - lightweight keep-alive ping only.
                         try:
