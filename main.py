@@ -466,19 +466,22 @@ def myStyle(log_queue):
     client.run(os.environ.get("botToken"))
 
 
-thread = None
-
-
 @st.cache_resource
 def initialize_heavy_stuff():
-    global thread
+    """
+    Runs exactly once per server process (cache_resource). The thread object
+    itself is returned as part of the cached result - that's the only way to
+    keep a reference to it across Streamlit reruns, since every top-level
+    variable in this script gets re-executed (and reset) on every rerun.
+    """
     with st.spinner("running your scripts..."):
-        thread = threading.Thread(
+        t = threading.Thread(
             target=myStyle, args=(st.session_state.log_queue,), daemon=True
         )
-        thread.start()
+        t.start()
         print("Heavy initialization running...")
         return {
+            "thread": t,
             "model": "loaded_successfully",
             "timestamp": time.time(),
             "db_status": "connected",
@@ -488,10 +491,11 @@ def initialize_heavy_stuff():
 st.title("my style")
 
 result = initialize_heavy_stuff()
+thread = result["thread"]
 
 st.success("The system is ready!")
 st.write("Result:")
-st.json(result)
+st.json({k: v for k, v in result.items() if k != "thread"})
 
 with st.status("Processing...", expanded=True) as status:
     placeholder = st.empty()
@@ -510,5 +514,5 @@ with st.status("Processing...", expanded=True) as status:
                         st.error(msg)
         except queue.Empty:
             time.sleep(0.3)
-    # 12334
+
     status.update(label="Bot is running", state="complete", expanded=False)
