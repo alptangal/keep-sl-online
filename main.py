@@ -435,6 +435,7 @@ def myStyle(log_queue):
                                     "error",
                                     f"{base_url} connect() failed: {e}",
                                 )
+                        #
                         # else:
                         #     # try:
                         #     #     # await msg.delete()
